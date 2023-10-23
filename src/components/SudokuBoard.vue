@@ -1,14 +1,9 @@
 <script setup>
-    defineProps({
-    msg: {
-        type: String,
-        required: false
-    }
-    })
+import { pb } from '../lib/pocketbase'
 </script>
 
 <template>
-<div class="sudoku-container">
+<div class="sudoku-container" v-bind:class="{ loading: boardLoading }">
     <div class="sudoku-board">
         <div v-for="(section, sectionIndex) in sudokuBoard" :key="sectionIndex" class="sudoku-board-section">
             <div v-for="(cell, cellIndex) in section" :key="cellIndex" :selected="cell.selected" class="sudoku-board-section-cell"
@@ -38,10 +33,24 @@
 
 <script>
 export default {
+  props: {
+    difficulty: {
+        type: Number,
+        required: true
+    }
+  },
+  watch: {
+    difficulty(){
+        this.boardLoading = true
+        this.clearBoard();
+        this.fetchBoard();
+    }
+  },
   data() {
     return {
         sudokuBoard: [],
-        curSelected: null
+        curSelected: null,
+        boardLoading: true
     };
   },
   beforeMount(){
@@ -59,9 +68,12 @@ export default {
         this.sudokuBoard.push(tempSection)
     }
 
+    this.fetchBoard()
+
     console.log("loading board")
-    this.convertToSubgrids(
-        [[0, 0, 1, 0, 5, 3, 6, 7, 8], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 7, 8, 1, 0, 9, 2, 0, 5], [1, 2, 0, 7, 0, 5, 0, 8, 0], [3, 0, 0, 0, 9, 1, 7, 0, 0], [7, 8, 0, 4, 2, 0, 0, 0, 1], [4, 0, 2, 5, 0, 0, 1, 0, 3], [0, 1, 3, 9, 6, 0, 0, 0, 0], [8, 0, 0, 3, 0, 0, 5, 6, 0]]    );
+    //this.convertToSubgrids(
+    //    [[0, 0, 1, 0, 5, 3, 6, 7, 8], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 7, 8, 1, 0, 9, 2, 0, 5], [1, 2, 0, 7, 0, 5, 0, 8, 0], [3, 0, 0, 0, 9, 1, 7, 0, 0], [7, 8, 0, 4, 2, 0, 0, 0, 1], [4, 0, 2, 5, 0, 0, 1, 0, 3], [0, 1, 3, 9, 6, 0, 0, 0, 0], [8, 0, 0, 3, 0, 0, 5, 6, 0]]
+    // );
   },
   methods: {
     /* INTERFACE */
@@ -87,6 +99,7 @@ export default {
 
         if(!isNaN(parsed) && parsed >= 1 && parsed <= 9){
             this.sudokuBoard[sectionIndex][cellIndex].number = inp
+            this.sudokuBoard[sectionIndex][cellIndex].selected = false
         }else{
             event.preventDefault();
         }
@@ -120,6 +133,16 @@ export default {
         this.sudokuBoard[sectionIndex][cellIndex].selected = false
     },
     /* LOGIC */
+    clearBoard(){
+        for (let i = 0; i < this.sudokuBoard.length; i++) {
+            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
+                this.sudokuBoard[i][j] = {number: null,
+                        notes: [],
+                        selected: false,
+                        locked: false}
+            }
+        }
+    },
     convertToSubgrids(board) {
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
@@ -131,6 +154,32 @@ export default {
                 this.sudokuBoard[i][j].locked = number !== 0;
             }
         }
+
+        this.boardLoading = false
+    },
+
+    async fetchBoard(){
+        let today = new Date();
+        let tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+
+        today = today.toISOString().split('T')[0];
+        tomorrow = tomorrow.toISOString().split('T')[0];
+
+        const query = `created >= "${today}" && created <= "${tomorrow}" && difficulty = ${this.difficulty}`
+
+        console.log(query)
+        const resultList = await pb.collection('boards').getList(1, 10, {
+            filter: query,
+        });
+
+        if(resultList.items.length == 1){
+            this.convertToSubgrids(resultList.items[0].board)
+        }else{
+            console.error("Error loading board")
+        }
+
+        console.log(resultList)
     }
   },
 };
@@ -145,6 +194,11 @@ export default {
 <style scoped>
 .sudoku-container{
     user-select: none;
+}
+
+.sudoku-container.loading{
+    filter: blur(4px);
+    pointer-events: none;
 }
 
 .sudoku-board{
@@ -251,8 +305,8 @@ input:read-only{
     background-color: grey;
 }
 
-.sudoku-board-section-cell-notes > span:hover{
-    background-color: lightblue;
+.sudoku-board-section-cell[selected="true"] > .sudoku-board-section-cell-notes > span:hover{
+    background-color: rgba(0, 0, 140, .5);
 }
 
 .sudoku-board-section-cell-notes > span[selected="true"]{
