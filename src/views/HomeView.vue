@@ -10,7 +10,7 @@ import SudokuBoard from '../components/SudokuBoard.vue'
     </button>
   </div>
 
-  <SudokuBoard :difficulty="difficulty !== undefined ? difficulty : 1" />
+  <SudokuBoard :difficulty='difficulty !== undefined ? Number(difficulty) : 1' />
   </main>
 </template>
 
@@ -41,18 +41,13 @@ main{
 }
 
 .button-group {
-    display: flex;
-    height: 32px;
-    margin: 12px 0 12px 0;
+  display: flex;
+  height: 32px;
+  margin: 12px 0 12px 0;
 }
 
-button {
-    padding: 6px;
-    width: 64px;
-    text-align: center;
-    cursor: pointer;
-    border: 1px solid var(--color-text-sec);
-    background-color: var(--background-color);
+.button-group button{
+  width: 64px;
 }
 
 button:nth-child(1){
@@ -62,6 +57,7 @@ button:nth-child(1){
 button:nth-child(2){
   border-right: 0;
   border-left: 0;
+  border-radius: 0px;
 }
 
 button:nth-last-child(1){

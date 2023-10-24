@@ -1,12 +1,21 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
+
+import ConfettiExplosion from "vue-confetti-explosion";
 </script>
 
 <template>
-<div class="sudoku-container" v-bind:class="{ loading: boardLoading }">
-    <div class="sudoku-board">
+<div class="sudoku-container">
+    <ConfettiExplosion  :particleCount="200" 
+                    :force="0.4" 
+                    :stageWidth="1000"
+                    :stageHeight="1500"
+                    v-if="sudokuSolved"/>
+    <div class="sudoku-board" v-bind:class="{ loading: boardLoading }">
         <div v-for="(section, sectionIndex) in sudokuBoard" :key="sectionIndex" class="sudoku-board-section">
-            <div v-for="(cell, cellIndex) in section" :key="cellIndex" :selected="cell.selected" class="sudoku-board-section-cell"
+            <div v-for="(cell, cellIndex) in section" :key="cellIndex" class="sudoku-board-section-cell"
+                :selected="cell.selected"
+                :wrong="cell.wrong && this.showWrongCells"
                 @mouseenter="handleMouseOver(sectionIndex, cellIndex)"
                 @mouseleave="handleMouseOut(sectionIndex, cellIndex)"
             >
@@ -28,6 +37,15 @@ import { pb } from '../lib/pocketbase'
             </div>
         </div>
     </div>
+    <div class="sudoku-controls">
+        <button @click="solveBoard()">Solve</button>
+        <button @click="checkForError()">Check for Errors</button>
+        <button @click="showWrongCells = !showWrongCells">Show Errors ({{showWrongCells}})</button>
+
+        <div class="spacer"></div>
+
+        <button @click="resetBoard()">Reset Board</button>
+    </div>
 </div>
 </template>
 
@@ -42,38 +60,28 @@ export default {
   watch: {
     difficulty(){
         this.boardLoading = true
-        this.clearBoard();
+        this.sudokuSolved = false
+        this.showWrongCells = false
+        this.sudokuBoard = this.createBoard()
         this.fetchBoard();
     }
   },
   data() {
     return {
         sudokuBoard: [],
+        solvedBoard: [],
         curSelected: null,
-        boardLoading: true
+        boardLoading: true,
+        sudokuSolved: false,
+        showWrongCells: false
     };
   },
   beforeMount(){
     console.log("populating board")
-    for(let i = 0; i < 9; i++){
-        let tempSection = []
-        for(let j = 0; j < 9; j++){
-            tempSection.push(
-                {number: null,
-                notes: [],
-                selected: false,
-                locked: false}
-            )
-        }
-        this.sudokuBoard.push(tempSection)
-    }
+    this.sudokuBoard = this.createBoard()
 
+    console.log("fetch board")
     this.fetchBoard()
-
-    console.log("loading board")
-    //this.convertToSubgrids(
-    //    [[0, 0, 1, 0, 5, 3, 6, 7, 8], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 7, 8, 1, 0, 9, 2, 0, 5], [1, 2, 0, 7, 0, 5, 0, 8, 0], [3, 0, 0, 0, 9, 1, 7, 0, 0], [7, 8, 0, 4, 2, 0, 0, 0, 1], [4, 0, 2, 5, 0, 0, 1, 0, 3], [0, 1, 3, 9, 6, 0, 0, 0, 0], [8, 0, 0, 3, 0, 0, 5, 6, 0]]
-    // );
   },
   methods: {
     /* INTERFACE */
@@ -95,11 +103,8 @@ export default {
 
         let parsed = parseInt(inp, 10);
         
-        console.log(parsed)
-
         if(!isNaN(parsed) && parsed >= 1 && parsed <= 9){
-            this.sudokuBoard[sectionIndex][cellIndex].number = inp
-            this.sudokuBoard[sectionIndex][cellIndex].selected = false
+            this.setCell(sectionIndex, cellIndex, inp)
         }else{
             event.preventDefault();
         }
@@ -127,37 +132,113 @@ export default {
         }
     },
     handleDbClick(sectionIndex, cellIndex, number){
-        this.sudokuBoard[sectionIndex][cellIndex].number = number
-        this.sudokuBoard[sectionIndex][cellIndex].notes = []
-
-        this.sudokuBoard[sectionIndex][cellIndex].selected = false
+        this.setCell(sectionIndex, cellIndex, number)
     },
     /* LOGIC */
-    clearBoard(){
-        for (let i = 0; i < this.sudokuBoard.length; i++) {
-            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
-                this.sudokuBoard[i][j] = {number: null,
+    createBoard(){
+        let tempBoard = []
+        for(let i = 0; i < 9; i++){
+            let tempSection = []
+            for(let j = 0; j < 9; j++){
+                tempSection.push(
+                    {
+                        number: null,
                         notes: [],
                         selected: false,
-                        locked: false}
+                        locked: false,
+                        wrong: false,
+                    }
+                )
             }
+            tempBoard.push(tempSection)
         }
+        
+        return tempBoard;
+    },
+    setCell(sectionIndex, cellIndex, number){
+        this.sudokuBoard[sectionIndex][cellIndex].number = number
+        this.sudokuBoard[sectionIndex][cellIndex].notes = []
+        this.sudokuBoard[sectionIndex][cellIndex].selected = false
+
+        this.checkForCompletion()
     },
     convertToSubgrids(board) {
+        let tempBoard = this.createBoard()
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
                 const row = Math.floor(i / 3) * 3 + Math.floor(j / 3);
                 const col = (i % 3) * 3 + (j % 3);
                 const number = board[row][col];
 
-                this.sudokuBoard[i][j].number = number !== 0 ? number : null;
-                this.sudokuBoard[i][j].locked = number !== 0;
+                tempBoard[i][j].number = number !== 0 ? number : null;
+                tempBoard[i][j].locked = number !== 0;
             }
         }
 
-        this.boardLoading = false
+        return tempBoard
     },
+    matchSolvedBoard(){
+        for (let i = 0; i < this.sudokuBoard.length; i++) {
+            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
+                if(!this.sudokuBoard[i][j].locked){
+                    this.solvedBoard[i][j].locked = false
+                }
+            }
+        }
+    },
+    solveBoard(){
+        this.sudokuBoard = this.solvedBoard;
+        
+        this.checkForCompletion()
+    },
+    checkForCompletion(){
+        let done = true
+        for (let i = 0; i < this.sudokuBoard.length; i++) {
+            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
+                if(this.sudokuBoard[i][j].number != this.solvedBoard[i][j].number){
+                    if(this.sudokuBoard[i][j].number != null){
+                        this.sudokuBoard[i][j].wrong = true
+                    }
+                    done = false
+                }else{
+                    this.sudokuBoard[i][j].wrong = false
+                }
+            }
+        }
 
+        if(done){
+            this.sudokuSolved = true;
+        }
+        return done
+    },
+    checkForError(){
+        for (let i = 0; i < this.sudokuBoard.length; i++) {
+            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
+                if(this.sudokuBoard[i][j].wrong){
+                    alert('Error made on Board')
+                    console.log(i, j)
+                    return true
+                }
+            }
+        }
+        alert("No errors so far")
+        return false
+    },
+    resetBoard(){
+        for (let i = 0; i < this.sudokuBoard.length; i++) {
+            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
+                if(!this.sudokuBoard[i][j].locked){
+                    this.sudokuBoard[i][j] = {
+                        number: null,
+                        notes: [],
+                        selected: false,
+                        locked: false,
+                        wrong: false,
+                    }
+                }
+            }
+        }
+    },
     async fetchBoard(){
         let today = new Date();
         let tomorrow = new Date(today);
@@ -168,13 +249,18 @@ export default {
 
         const query = `created >= "${today}" && created <= "${tomorrow}" && difficulty = ${this.difficulty}`
 
-        console.log(query)
+        // console.log(query)
         const resultList = await pb.collection('boards').getList(1, 10, {
             filter: query,
         });
 
         if(resultList.items.length == 1){
-            this.convertToSubgrids(resultList.items[0].board)
+            this.sudokuBoard = this.convertToSubgrids(resultList.items[0].board)
+            this.solvedBoard = this.convertToSubgrids(resultList.items[0].solved_board)
+
+            this.matchSolvedBoard()
+
+            this.boardLoading = false
         }else{
             console.error("Error loading board")
         }
@@ -189,17 +275,22 @@ export default {
 :root {
     --cell-size: 52px;
 }
+
+.confetti-container{
+    position: absolute;
+    left: calc((var(--cell-size) * 4.5));
+    top: calc((var(--cell-size) * 4.5));
+    background-color: black;
+}
+
 </style>
 
 <style scoped>
 .sudoku-container{
     user-select: none;
     transition: 0.1s;
-}
 
-.sudoku-container.loading{
-    filter: blur(4px);
-    pointer-events: none;
+    width: calc(var(--cell-size) * 3 * 3 + 4px);
 }
 
 .sudoku-board{
@@ -207,6 +298,11 @@ export default {
     grid-template-columns: repeat(3, 1fr);
     width: calc(var(--cell-size) * 3 * 3);
     height: calc(var(--cell-size) * 3 * 3);
+}
+
+.sudoku-board.loading{
+    filter: blur(4px);
+    pointer-events: none;
 }
 
 .sudoku-board-section{
@@ -312,6 +408,10 @@ input:read-only{
 
 /* game */
 
+.sudoku-board-section-cell[wrong="true"] > input{
+    color: var(--color-accent-sec);
+}
+
 .sudoku-board-section-cell[selected="true"] > .sudoku-board-section-cell-notes{
     visibility: visible;
     background-color: var(--color-background-solid);
@@ -331,4 +431,15 @@ input:read-only{
     color: var(--color-text);
 }
 
+/* controls */
+.sudoku-controls{
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.sudoku-controls .spacer{
+    flex-grow: 1;
+}
 </style>
