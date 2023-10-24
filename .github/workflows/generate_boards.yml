@@ -6,7 +6,7 @@ on:
     - cron: '0 0 * * *'  # Run every day at 12 AM UTC
 
 jobs:
-  run-dockerfile-logic:
+  generate:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,4 +17,4 @@ jobs:
       run: docker build -t sudoku_generator:latest ./sudoku_generator
 
     - name: Run Dockerfile Logic
-      run: docker run --rm sudoku_generator:latest
+      run: docker run --rm -e POCKETBASE_ADMIN=${{ secrets.POCKETBASE_ADMIN }} -e POCKETBASE_PASSWORD=${{ secrets.POCKETBASE_PASSWORD }} sudoku_generator:latest

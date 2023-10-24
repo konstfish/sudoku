@@ -4,6 +4,5 @@ WORKDIR /opt/app
 COPY . /opt/app
 
 RUN pip install -r requirements.txt
-RUN export $(cat .env | xargs)
 
 ENTRYPOINT [ "python3", "-u", "main.py" ]
