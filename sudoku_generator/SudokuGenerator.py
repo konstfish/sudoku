@@ -11,6 +11,7 @@ class SudokuGenerator:
         self.grid = self.generate_full_grid()
         self.unsolved_grid = copy.deepcopy(self.grid)
 
+        self.shuffle_grid(self.grid)
         self.remove_values()
 
     def solve_sudoku(self):
@@ -29,8 +30,44 @@ class SudokuGenerator:
         return False
 
     def generate_full_grid(self):
-        self.solve_sudoku()
-        return [row[:] for row in self.grid]
+        # Start with an empty grid
+        grid = [[0] * 9 for _ in range(9)]
+
+        # Fill the diagonal boxes with random permutations of numbers 1 to 9
+        for i in range(0, 9, 3):
+            box = list(range(1, 10))
+            random.shuffle(box)
+            for j in range(3):
+                grid[i + j][i:i + 3] = box[j * 3: (j + 1) * 3]
+
+        # Solve the initial grid
+        solver = SudokuGenerator()
+        solver.grid = grid
+        solver.solve_sudoku()
+
+        return solver.grid
+
+    def shuffle_grid(self, grid):
+        # Shuffle rows
+        for i in range(0, 9, 3):
+            box = grid[i:i + 3]
+            random.shuffle(box)
+            grid[i:i + 3] = box
+
+        # Transpose the grid and shuffle columns
+        grid = [list(row) for row in zip(*grid)]
+        for i in range(0, 9, 3):
+            box = grid[i:i + 3]
+            random.shuffle(box)
+            grid[i:i + 3] = box
+        grid = [list(row) for row in zip(*grid)]
+
+        # Shuffle numbers within each row and column
+        for _ in range(20):
+            random.shuffle(grid)
+            grid = [list(row) for row in zip(*grid)]
+            random.shuffle(grid)
+            grid = [list(row) for row in zip(*grid)]
 
     def find_empty(self):
         for i in range(9):
@@ -54,13 +91,13 @@ class SudokuGenerator:
 
     def is_safe_box(self, start_row, start_col, num):
         return all(
-            num not in self.grid[i][start_col : start_col + 3]
+            num not in self.grid[i][start_col: start_col + 3]
             for i in range(start_row, start_row + 3)
         )
 
     def remove_values(self):
         for _ in range(self.attempts):
-            row, col = random.randint(0, 9 - 1), random.randint(0, 9 - 1)
+            row, col = random.randint(0, 8), random.randint(0, 8)
             if self.grid[row][col] != 0:
                 backup = self.grid[row][col]
                 self.grid[row][col] = 0
