@@ -15,7 +15,7 @@ import ConfettiExplosion from "vue-confetti-explosion";
         <div v-for="(section, sectionIndex) in sudokuBoard" :key="sectionIndex" class="sudoku-board-section">
             <div v-for="(cell, cellIndex) in section" :key="cellIndex" class="sudoku-board-section-cell"
                 :selected="cell.selected"
-                :wrong="cell.wrong && this.showWrongCells"
+                :wrong="cell.wrong && showWrongCells"
                 @mouseenter="handleMouseOver(sectionIndex, cellIndex)"
                 @mouseleave="handleMouseOut(sectionIndex, cellIndex)"
             >
@@ -225,6 +225,7 @@ export default {
         return false
     },
     resetBoard(){
+        this.sudokuSolved = false
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
                 if(!this.sudokuBoard[i][j].locked){
