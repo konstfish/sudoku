@@ -1,6 +1,7 @@
 name: Generate Daily Sudoku Boards
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # Run every day at 12 AM UTC
 
