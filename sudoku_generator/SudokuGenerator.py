@@ -9,9 +9,10 @@ class SudokuGenerator:
         self.attempts = 40 + difficulty * 20
 
         self.grid = self.generate_full_grid()
+        self.shuffle_grid(self.grid)
+
         self.unsolved_grid = copy.deepcopy(self.grid)
 
-        self.shuffle_grid(self.grid)
         self.remove_values()
 
     def solve_sudoku(self):
@@ -116,3 +117,7 @@ class SudokuGenerator:
     def print_board(self):
         for row in self.grid:
             print(row)
+
+    def print_boards(self):
+        for i in range(0,9):
+            print(self.unsolved_grid[i], self.grid[i])

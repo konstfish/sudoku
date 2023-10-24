@@ -18,7 +18,7 @@ def upload_board(difficulty):
     sudoku_generator = SudokuGenerator()
     sudoku_generator.generate_board(difficulty)
 
-    sudoku_generator.print_board()
+    sudoku_generator.print_boards()
 
     data = {
         "difficulty": difficulty,
