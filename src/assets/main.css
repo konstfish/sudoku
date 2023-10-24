@@ -10,6 +10,10 @@
 a,
 .green {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  color: var(--color-accent);
   transition: 0.4s;
+}
+
+h1, h2, h3, h4{
+  margin: 0;
 }

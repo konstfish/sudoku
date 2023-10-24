@@ -51,12 +51,17 @@ button {
     width: 64px;
     text-align: center;
     cursor: pointer;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
+    border: 1px solid var(--color-text-sec);
+    background-color: var(--background-color);
 }
 
 button:nth-child(1){
   border-radius: 8px 0 0 8px;
+}
+
+button:nth-child(2){
+  border-right: 0;
+  border-left: 0;
 }
 
 button:nth-last-child(1){
@@ -65,7 +70,7 @@ button:nth-last-child(1){
 
 /* Style for the selected button */
 .active {
-    background-color: #51bd55;
-    color: white;
+    background-color: var(--color-accent);
+    color: var(--color-text);
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <h1>:)</h1>
+    <h3>Made with &lt;3 for my Mom</h3>
   </div>
 </template>
 

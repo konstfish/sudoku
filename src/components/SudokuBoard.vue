@@ -194,6 +194,7 @@ export default {
 <style scoped>
 .sudoku-container{
     user-select: none;
+    transition: 0.1s;
 }
 
 .sudoku-container.loading{
@@ -215,9 +216,25 @@ export default {
     width: calc(var(--cell-size) * 3);
     height: calc(var(--cell-size) * 3);
 
-    border: 1px solid white;
+    border: 1px solid var(--color-text);
     border-top-width: 0px;
     border-right-width: 0px;
+}
+
+.sudoku-board-section:nth-child(1){
+    border-top-left-radius: 8px;
+}
+
+.sudoku-board-section:nth-last-child(1){
+    border-bottom-right-radius: 8px;
+}
+
+.sudoku-board-section:nth-last-child(3){
+    border-bottom-left-radius: 8px;
+}
+
+.sudoku-board-section:nth-child(3){
+    border-top-right-radius: 8px;
 }
 
 .sudoku-board-section-cell{
@@ -256,8 +273,8 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0);
-    color: rgba(255, 255, 255, 0);
+    background-color: var(--color-background-transparent);
+    color: var(--color-text-transparent);
 
     visibility: hidden;
     transition: 0.2s;
@@ -281,7 +298,7 @@ input{
 
     text-align: center;
 
-    color: white;
+    color: var(--color-text);
 
     user-select: none;
     cursor: default;
@@ -290,28 +307,28 @@ input{
 }
 
 input:read-only{
-    color: darkgray;
+    color: gray;
 }
 
 /* game */
 
 .sudoku-board-section-cell[selected="true"] > .sudoku-board-section-cell-notes{
     visibility: visible;
-    background-color: rgba(0, 0, 0, 1);
-    color: rgba(255, 255, 255, 1);
+    background-color: var(--color-background-solid);
+    color: var(--color-text-solid);
 }
 
 .sudoku-board-section-cell[selected="true"] > .sudoku-board-section-cell-notes > span[selected="true"]{
-    background-color: grey;
+    background-color: var(--color-background-sec);
 }
 
 .sudoku-board-section-cell[selected="true"] > .sudoku-board-section-cell-notes > span:hover{
-    background-color: rgba(0, 0, 140, .5);
+    background-color: var(--color-accent-transparent);
 }
 
 .sudoku-board-section-cell-notes > span[selected="true"]{
     visibility: visible;
-    color: rgba(255, 255, 255, 1);
+    color: var(--color-text);
 }
 
 </style>
