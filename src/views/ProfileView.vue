@@ -2,11 +2,13 @@
 import { pb } from '../lib/pocketbase'
 
 import Auth from '../components/Auth.vue'
+import Profile from '../components/Profile.vue'
 </script>
 
 <template>
   <div class="profile">
-    <Auth />
+    <Profile v-if="signedIn" />
+    <Auth v-else />
   </div>
 </template>
 
@@ -15,13 +17,17 @@ import Auth from '../components/Auth.vue'
 export default {
   data() {
     return {
-      
+      signedIn: pb.authStore.isValid
     };
   },
   beforeMount(){
+    pb.authStore.onChange(() => {
+      this.signedIn = pb.authStore.isValid
+    }, true)
   },
   methods: {
-  }
+
+  },
 };
 </script>
 

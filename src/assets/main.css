@@ -55,6 +55,13 @@ button {
   border-radius: 8px;
 }
 
+input{
+  border: 1px solid var(--color-text-sec);
+  background-color: var(--background-color);
+  color: var(--color-text);
+}
+
+/* icons */
 svg{
   height: 16px;
   margin-bottom: -3px;

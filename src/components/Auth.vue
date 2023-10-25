@@ -2,21 +2,37 @@
 import { pb } from '../lib/pocketbase'
 
 import IconGoogle from './icons/IconGoogle.vue'
+import PasswordInput from './PasswordInput.vue'
 </script>
 
 <template>
   <div class="auth-container">
-    <div class="login-container">
-
+    <div class="button-group">
+      <button @click="signIn = !signIn" :class="{ active: signIn }">
+        Sign In
+      </button>
+      <button @click="signIn = !signIn" :class="{ active: !signIn }">
+        Register
+      </button>
     </div>
 
-    <div class="register-container">
+    <div class="input-group login-container">
+      <input type="text" v-model="inputEmail" placeholder="email" @input="checkEmail">
+      <input type="text" v-model="inputUsername" placeholder="username" @input="checkUsername" v-if="!signIn">
 
+      <PasswordInput @password-validation="handlePasswordValidation" />
+
+      <button @click="emailSignIn()" :disabled="!isPasswordValid || !isEmailValid || !buttonEnabled" v-if="signIn">
+        <span v-if="!buttonEnabled" class="spinner"></span>Sign In
+      </button>
+      <button @click="emailRegister()" :disabled="!isPasswordValid || !isEmailValid || !isUsernameValid || !buttonEnabled" v-if="!signIn">
+        <span v-if="!buttonEnabled" class="spinner"></span>Register
+      </button>
+
+      <div class="spacer"></div>
+
+      <button @click="oauthSignIn('google')"><IconGoogle /> <span v-if="signIn">Sign in</span><span v-if="!signIn">Register</span> with Google</button>
     </div>
-
-    <button>Sign In</button>
-
-    <button @click="googleSignIn()"><IconGoogle /> Sign in with Google</button>
   </div>
 </template>
 
@@ -25,25 +41,158 @@ import IconGoogle from './icons/IconGoogle.vue'
 export default {
   data() {
     return {
-        
+        signIn: true,
+        inputEmail: "",
+        inputPassword: "",
+        inputUsername: "",
+        isPasswordValid: false,
+        isEmailValid: false,
+        isUsernameValid: false,
+        buttonEnabled: true
     };
   },
   beforeMount(){
-    console.log('asdf')
   },
   methods: {
-    async googleSignIn(){
-        const authData = await pb.collection('users').authWithOAuth2({ provider: 'google' });
+    async oauthSignIn(provider){
+        const authData = await pb.collection('users').authWithOAuth2({ provider: provider });
         console.log(authData)
 
         console.log(pb.authStore.isValid);
         console.log(pb.authStore.token);
         console.log(pb.authStore.model.id);
     },
+
+    async emailSignIn(){
+      this.buttonEnabled = false
+        pb.collection('users').authWithPassword(this.inputEmail, this.inputPassword)
+          .catch((err) => {
+            this.alertUser(err)
+        })
+    },
+
+    async emailRegister(){
+      this.buttonEnabled = false
+      const data = {
+          "username": this.inputUsername,
+          "email": this.inputEmail,
+          "emailVisibility": false,
+          "password": this.inputPassword,
+          "passwordConfirm": this.inputPassword
+      };
+
+      await pb.collection('users').create(data)
+        .catch((err) => {
+          this.alertUser(err)
+        })
+
+      await pb.collection('users').requestVerification(this.inputEmail);
+    },
+
+    alertUser(error){
+      this.buttonEnabled = true
+      alert(error)
+      console.error(error.data)
+    },
+
+    handlePasswordValidation({ password, isValid }) {
+      this.inputPassword = password;
+      this.isPasswordValid = isValid;
+    },
+
+    checkEmail() {
+      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.inputEmail)
+      this.isEmailValid = valid;
+    },
+
+    checkUsername() {
+      const valid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(this.inputUsername)
+      this.isUsernameValid = valid;
+    },
   }
 };
 </script>
 
-<style>
+<style scoped>
+.auth-container{
+  width: 200px;
+}
 
+.auth-container > .input-group{
+  width: 200px;
+  display: flex;
+  flex-wrap: wrap;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+}
+
+.auth-container > div > input{
+  border-radius: 8px;
+  padding: 6px;
+
+  width: 186px;
+}
+
+.auth-container > div > button{
+  width: 200px;
+}
+
+button{
+  transition: 0.4s;
+}
+
+button:disabled{
+  color: gray;
+  border: 1px solid gray;
+}
+
+/* selector */
+
+.button-group {
+  display: flex;
+  width: 200px;
+  margin: 12px 0 12px 0;
+}
+
+.button-group button{
+  width: 64px;
+  padding: 6px;
+}
+
+.button-group button:nth-child(1){
+  border-radius: 8px 0 0 8px;
+}
+
+.button-group button:nth-last-child(1){
+  border-radius: 0 8px 8px 0;
+  border-left: 0;
+}
+
+/* Style for the selected button */
+.active {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.spinner {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 2px solid #3498db; /* Adjust the color as needed */
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-bottom: -4px;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
