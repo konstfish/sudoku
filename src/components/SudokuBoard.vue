@@ -44,6 +44,7 @@ import ConfettiExplosion from "vue-confetti-explosion";
 
         <div class="spacer"></div>
 
+        <button @click="undoStep()">Undo</button>
         <button @click="resetBoard()">Reset Board</button>
     </div>
 </div>
@@ -70,6 +71,7 @@ export default {
     return {
         sudokuBoard: [],
         solvedBoard: [],
+        steps: [],
         curSelected: null,
         boardLoading: true,
         sudokuSolved: false,
@@ -84,6 +86,35 @@ export default {
     this.fetchBoard()
   },
   methods: {
+    /* HELPERS */
+    setCell(sectionIndex, cellIndex, number){
+        this.logStep('note', sectionIndex, cellIndex, this.sudokuBoard[sectionIndex][cellIndex].notes, [])
+        this.logStep('number', sectionIndex, cellIndex, this.sudokuBoard[sectionIndex][cellIndex].number, number)
+
+        this.sudokuBoard[sectionIndex][cellIndex].number = number
+        this.sudokuBoard[sectionIndex][cellIndex].selected = false
+        this.sudokuBoard[sectionIndex][cellIndex].notes = []
+
+        this.checkForCompletion()
+    },
+    setCellNote(sectionIndex, cellIndex, number){
+        const preNotes = [...this.sudokuBoard[sectionIndex][cellIndex].notes]
+        if(this.checkIfIncludes(sectionIndex, cellIndex, number)){
+            let index = this.sudokuBoard[sectionIndex][cellIndex].notes.indexOf(number);
+            if (index !== -1) {
+                this.sudokuBoard[sectionIndex][cellIndex].notes.splice(index, 1);
+            }
+        }else{
+            this.sudokuBoard[sectionIndex][cellIndex].notes.push(number)
+        }
+        this.logStep('note', sectionIndex, cellIndex, preNotes, this.sudokuBoard[sectionIndex][cellIndex].notes)
+    },
+    checkIfIncludes(sectionIndex, cellIndex, number){
+        return this.sudokuBoard[sectionIndex][cellIndex].notes.includes(number);
+    },
+    generateRange(start, end) {
+      return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+    },
     /* INTERFACE */
     handleMouseOver(sectionIndex, cellIndex){
         const inpName = `input-${sectionIndex}-${cellIndex}`
@@ -112,24 +143,11 @@ export default {
     handleKeyDown(event){
         event.preventDefault();
     },
-    generateRange(start, end) {
-      return Array.from({ length: end - start + 1 }, (_, index) => start + index);
-    },
-    checkIfIncludes(sectionIndex, cellIndex, number){
-        return this.sudokuBoard[sectionIndex][cellIndex].notes.includes(number)
-    },
     handleClick(sectionIndex, cellIndex, number){
         if(this.sudokuBoard[sectionIndex][cellIndex].number != null){
-            this.sudokuBoard[sectionIndex][cellIndex].number = null
+            this.setCell(sectionIndex, cellIndex, null)
         }
-        if(this.checkIfIncludes(sectionIndex, cellIndex, number)){
-            let index = this.sudokuBoard[sectionIndex][cellIndex].notes.indexOf(number);
-            if (index !== -1) {
-                this.sudokuBoard[sectionIndex][cellIndex].notes.splice(index, 1);
-            }
-        }else{
-            this.sudokuBoard[sectionIndex][cellIndex].notes.push(number)
-        }
+        this.setCellNote(sectionIndex, cellIndex, number)
     },
     handleDbClick(sectionIndex, cellIndex, number){
         this.setCell(sectionIndex, cellIndex, number)
@@ -154,13 +172,6 @@ export default {
         }
         
         return tempBoard;
-    },
-    setCell(sectionIndex, cellIndex, number){
-        this.sudokuBoard[sectionIndex][cellIndex].number = number
-        this.sudokuBoard[sectionIndex][cellIndex].notes = []
-        this.sudokuBoard[sectionIndex][cellIndex].selected = false
-
-        this.checkForCompletion()
     },
     convertToSubgrids(board) {
         let tempBoard = this.createBoard()
@@ -271,6 +282,45 @@ export default {
         this.matchSolvedBoard()
 
         this.boardLoading = false
+    },
+
+    // actions:
+    // {add-hint, remove-hint, set-number, remove-number}
+
+    logStep(action, sectionIndex, cellIndex, prevNumber, number){
+        const tempStep = {
+            action: action,
+            sectionIndex: sectionIndex,
+            cellIndex: cellIndex,
+            number: number,
+            prevNumber: prevNumber
+        }
+
+        this.steps.push(tempStep)
+        console.log(this.steps)
+    },
+
+    undoStep(){
+        if(this.steps.length > 0){
+            const step = this.steps.pop()
+            console.log(step)
+
+            switch (step.action) {
+                case "note":
+                    this.sudokuBoard[step.sectionIndex][step.cellIndex].notes = step.prevNumber
+                    break;
+
+                case "number":
+                    this.sudokuBoard[step.sectionIndex][step.cellIndex].number = step.prevNumber
+                    break;
+            }
+
+            this.checkForCompletion()
+        }
+    },
+    
+    redoStep(){
+        console.log('asdf')
     }
   },
 };
