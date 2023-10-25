@@ -10,7 +10,8 @@ import SudokuBoard from '../components/SudokuBoard.vue'
     </button>
   </div>
 
-  <SudokuBoard :difficulty='difficulty !== undefined ? Number(difficulty) : 1' />
+  <!-- <SudokuBoard :difficulty='difficulty !== undefined ? Number(difficulty) : 1' /> -->
+  <SudokuBoard :difficulty='Number(difficulty)' />
   </main>
 </template>
 

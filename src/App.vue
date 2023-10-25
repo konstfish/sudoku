@@ -1,5 +1,9 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+
+import IconHome from './components/icons/IconHome.vue'
+import IconUser from './components/icons/IconUser.vue'
+import IconAbout from './components/icons/IconAbout.vue'
 </script>
 
 <template>
@@ -8,8 +12,9 @@ import { RouterLink, RouterView } from 'vue-router'
       <h1>Standard Sudoku Clone</h1>
 
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/"><IconHome /> Home</RouterLink>
+        <RouterLink to="/profile"><IconUser /> Profile</RouterLink>
+        <RouterLink to="/about"><IconAbout /> About</RouterLink>
       </nav>
     </div>
   </header>

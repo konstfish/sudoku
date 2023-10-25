@@ -187,8 +187,12 @@ export default {
         }
     },
     solveBoard(){
-        this.sudokuBoard = this.solvedBoard;
-        
+        for (let i = 0; i < this.sudokuBoard.length; i++) {
+            for (let j = 0; j < this.sudokuBoard[i].length; j++) {
+                this.sudokuBoard[i][j] = this.solvedBoard[i][j]
+            }
+        }
+
         this.checkForCompletion()
     },
     checkForCompletion(){
@@ -251,22 +255,22 @@ export default {
         const query = `created >= "${today}" && created <= "${tomorrow}" && difficulty = ${this.difficulty}`
 
         // console.log(query)
-        const resultList = await pb.collection('boards').getList(1, 10, {
-            filter: query,
-        });
+        try{
+            const resultList = await pb.collection('boards').getList(1, 1, {
+                filter: query,
+            });
 
-        if(resultList.items.length == 1){
             this.sudokuBoard = this.convertToSubgrids(resultList.items[0].board)
             this.solvedBoard = this.convertToSubgrids(resultList.items[0].solved_board)
 
-            this.matchSolvedBoard()
-
-            this.boardLoading = false
-        }else{
+            console.log(resultList)
+        }catch{
             console.error("Error loading board")
         }
 
-        console.log(resultList)
+        this.matchSolvedBoard()
+
+        this.boardLoading = false
     }
   },
 };
@@ -292,6 +296,8 @@ export default {
     transition: 0.1s;
 
     width: calc(var(--cell-size) * 3 * 3 + 4px);
+
+    overflow-y: hidden;
 }
 
 .sudoku-board{
@@ -340,7 +346,7 @@ export default {
     height: calc(var(--cell-size) - 4);
     width: calc(var(--cell-size) - 4);
 
-    border: 1px solid gray;
+    border: 1px solid var(--color-gray);
     border-top-width: 0px;
     border-left-width: 0px;
 }
