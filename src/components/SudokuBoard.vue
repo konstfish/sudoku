@@ -2,6 +2,7 @@
 import { pb } from '../lib/pocketbase'
 
 import ConfettiExplosion from "vue-confetti-explosion";
+import Timer from './Timer.vue'
 </script>
 
 <template>
@@ -46,6 +47,9 @@ import ConfettiExplosion from "vue-confetti-explosion";
 
         <button @click="undoStep()">Undo</button>
         <button @click="resetBoard()">Reset Board</button>
+    </div>
+    <div class="timer">
+        <timer></timer>
     </div>
 </div>
 </template>
