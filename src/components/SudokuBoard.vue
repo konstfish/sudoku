@@ -93,6 +93,7 @@ export default {
         this.sudokuSolved = false
         this.showWrongCells = false
         this.boardReady = false
+        this.elapsedTime = 0
 
         console.log("populating board")
         this.sudokuBoard = this.createBoard()
