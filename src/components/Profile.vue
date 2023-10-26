@@ -3,6 +3,8 @@ import { pb } from '../lib/pocketbase'
 
 import SudokuBoardList from './SudokuBoardList.vue'
 
+import Modal from './Modal.vue'
+
 import IconUser from './icons/IconUser.vue'
 import IconMail from './icons/IconMail.vue'
 import IconClock from './icons/IconClock.vue'
@@ -38,6 +40,8 @@ import IconClock from './icons/IconClock.vue'
       </div>
     </div>
 
+    <Modal v-show="emailModal" @close="emailModal = false" width="200" height="100">Please check your email!</Modal>
+
     <hr>
 
     <SudokuBoardList />
@@ -46,16 +50,19 @@ import IconClock from './icons/IconClock.vue'
 
 <script>
 export default {
+  components: { Modal },
   data() {
     return {
       username: pb.authStore.model.username,
       storeUser: pb.authStore.model.username,
       email: pb.authStore.model.email,
-      verified: pb.authStore.model.email,
-      registered: this.formatDate(pb.authStore.model.created)
+      verified: pb.authStore.model.verified,
+      registered: this.formatDate(pb.authStore.model.created),
+      emailModal: false
     };
   },
   beforeMount(){
+    this.refreshAuth();
   },
   methods: {
     formatDate(date) {
@@ -81,12 +88,22 @@ export default {
           this.storeUser = pb.authStore.model.username
         }
       }catch(err){
-
+        console.log(err)
       }
+    },
+    async verifyMail(){
+      await pb.collection('users').requestVerification(this.email);
+      this.emailModal = true;
+      this.verified = true;
     },
     async logoutUser(){
         pb.authStore.clear();
     },
+    async refreshAuth(){
+      if (pb.authStore.isValid) {
+        await pb.collection('users').authRefresh();
+      }
+    }
   }
 };
 </script>
@@ -137,5 +154,4 @@ label{
 .stats button{
   flex-grow: none;
 }
-
 </style>

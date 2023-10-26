@@ -1,6 +1,8 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
+import Modal from './Modal.vue'
+
 import IconUser from './icons/IconUser.vue'
 import IconMail from './icons/IconMail.vue'
 import IconGoogle from './icons/IconGoogle.vue'
@@ -43,6 +45,8 @@ import PasswordInput from './PasswordInput.vue'
 
       <button @click="oauthSignIn('google')"><IconGoogle /> <span v-if="signIn">Sign in</span><span v-if="!signIn">Register</span> with Google</button>
     </div>
+
+    <Modal v-show="infoModal" @close="infoModal = false" width="200" height="100">{{ infoModalContent }}</Modal>
   </div>
 </template>
 
@@ -58,7 +62,9 @@ export default {
         isPasswordValid: false,
         isEmailValid: false,
         isUsernameValid: false,
-        buttonEnabled: true
+        buttonEnabled: true,
+        infoModal: false,
+        infoModalContent: ""
     };
   },
   beforeMount(){
@@ -92,17 +98,47 @@ export default {
       };
 
       await pb.collection('users').create(data)
+        .then(() => {
+          pb.collection('users').authWithPassword(this.inputEmail, this.inputPassword)
+            .catch((err) => {
+              this.alertUser(err)
+          })
+        })
         .catch((err) => {
           this.alertUser(err)
         })
-
-      await pb.collection('users').requestVerification(this.inputEmail);
     },
 
     alertUser(error){
       this.buttonEnabled = true
-      alert(error)
+      this.infoModal = true
+
+      if(error.data == {}){
+        this.infoModalContent = error.data.message
+      }else{
+        this.infoModalContent = this.extractErrorMessage(error.data.data)
+      }
+
       console.error(error.data)
+    },
+
+    extractErrorMessage(error) {
+      if (error && typeof error === 'object') {
+          if ('message' in error) {
+              return error.message;
+          }
+
+          for (let key in error) {
+              if (error.hasOwnProperty(key)) {
+                  const result = this.extractErrorMessage(error[key]);
+                  if (result) {
+                      return result;
+                  }
+              }
+          }
+      }
+
+      return 'Unknown Error';
     },
 
     handlePasswordValidation({ password, isValid }) {

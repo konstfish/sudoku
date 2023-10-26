@@ -1,10 +1,11 @@
 <template>
   <transition name="modal-fade">
     <div class="modal-backdrop" @click="close">
-      <div class="modal" @click.stop>
+      <div class="modal" :style="cssProps" @click.stop>
         <div class="content">
           <slot></slot>
         </div>
+        <div class="spacer"></div>
         <button @click="close">Close</button>
       </div>
     </div>
@@ -14,15 +15,28 @@
 <script>
   export default {
     name: 'Modal',
+    props: {
+      width: String,
+      height: String
+    },
+    computed: {
+      cssProps() {
+        return {
+          'width': this.width + "px",
+          'height': this.height + "px",
+          }
+        }
+    },
     methods: {
       close() {
+        console.log(this.height)
         this.$emit('close');
       },
     },
   };
 </script>
 
-<style>
+<style scoped>
   .modal-backdrop {
     position: fixed;
     top: 0;
@@ -33,17 +47,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 100;
   }
 
   .modal {
     background: var(--color-background);
-    width: 320px;
-    height: 400px;
     padding: 12px;
     display: flex;
     flex-direction: column;
     border-radius: 8px;
-    border: 1px solid var(--color-background-sec)
+    border: 1px solid var(--color-background-sec);
+    z-index: 101;
   }
 
   .modal-fade-enter,
@@ -61,7 +75,6 @@
   }
 
   button{
-    margin-top: 6px;
     margin: 0;
   }
 </style>

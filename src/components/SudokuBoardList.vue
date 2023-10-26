@@ -22,8 +22,8 @@ import Modal from './Modal.vue';
                 <button @click="showReplay(board.id)">Show Replay</button>
             </div>
         </div>
-        <Modal v-show="replayVisible" @close="closeModal()">
-        <SudokuViewer v-if="boardData" :boardData="boardData" />
+        <Modal v-show="replayVisible" width="320" height="400" @close="closeModal()">
+          <SudokuViewer v-if="boardData" :boardData="boardData" />
         </Modal>
     </div>
 </template>

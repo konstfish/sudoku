@@ -35,9 +35,9 @@ export default {
   },
   methods: {
     async refreshAuth(){
-    if (pb.authStore.isValid) {
-      await pb.collection('users').authRefresh();
-    }
+      if (pb.authStore.isValid) {
+        await pb.collection('users').authRefresh();
+      }
     }
   },
 };
