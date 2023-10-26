@@ -503,7 +503,7 @@ export default {
 }
 
 .sudoku-board-section-cell-notes > span{
-    font-size: 8px;
+    font-size: calc(var(--cell-size-viewer) / 3);
     display: inline-block;
     display: grid;
     align-items: center;
@@ -567,5 +567,11 @@ input:read-only{
 
 .sudoku-controls .spacer{
     flex-grow: 1;
+}
+
+/* timer */
+.timer{
+    margin-top: 4px;
+    text-align: center;
 }
 </style>

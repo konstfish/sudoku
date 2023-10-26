@@ -29,7 +29,7 @@ import PasswordInput from './PasswordInput.vue'
         <span v-if="!buttonEnabled" class="spinner"></span>Register
       </button>
 
-      <div class="spacer"></div>
+      <div class="spacer">- or -</div>
 
       <button @click="oauthSignIn('google')"><IconGoogle /> <span v-if="signIn">Sign in</span><span v-if="!signIn">Register</span> with Google</button>
     </div>
