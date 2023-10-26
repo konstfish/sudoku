@@ -1,5 +1,6 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
+import { localStore } from '../lib/localstore'
 
 import ConfettiExplosion from "vue-confetti-explosion";
 import Timer from './Timer.vue'
@@ -12,7 +13,7 @@ import Timer from './Timer.vue'
                     :stageWidth="1000"
                     :stageHeight="1500"
                     v-if="sudokuSolved"/>
-    <div class="sudoku-board" v-bind:class="{ loading: boardLoading }">
+    <div class="sudoku-board" v-bind:class="{ loading: !boardReady || boardLoading }">
         <div v-for="(section, sectionIndex) in sudokuBoard" :key="sectionIndex" class="sudoku-board-section">
             <div v-for="(cell, cellIndex) in section" :key="cellIndex" class="sudoku-board-section-cell"
                 :selected="cell.selected"
@@ -49,7 +50,7 @@ import Timer from './Timer.vue'
         <button @click="resetBoard()">Reset Board</button>
     </div>
     <div class="timer">
-        <timer></timer>
+        <Timer :elapsedTime="elapsedTime" :timerStart="gameStarted" @elapsedTime="elapsedTime = $event"/>
     </div>
 </div>
 </template>
@@ -64,11 +65,7 @@ export default {
   },
   watch: {
     difficulty(){
-        this.boardLoading = true
-        this.sudokuSolved = false
-        this.showWrongCells = false
-        this.sudokuBoard = this.createBoard()
-        this.fetchBoard();
+        this.initComponent();
     }
   },
   data() {
@@ -78,19 +75,34 @@ export default {
         steps: [],
         curSelected: null,
         boardLoading: true,
+        boardReady: false,
+        boardId: null,
         sudokuSolved: false,
-        showWrongCells: false
+        showWrongCells: false,
+        elapsedTime: 0,
+        gameStarted: true
     };
   },
   beforeMount(){
-    console.log("populating board")
-    this.sudokuBoard = this.createBoard()
-
-    console.log("fetch board")
-    this.fetchBoard()
+    this.initComponent();
   },
   methods: {
     /* HELPERS */
+    initComponent(){
+        this.boardLoading = true
+        this.sudokuSolved = false
+        this.showWrongCells = false
+        this.boardReady = false
+
+        console.log("populating board")
+        this.sudokuBoard = this.createBoard()
+
+        console.log("fetch board")
+        this.fetchBoard();
+
+        console.log("check localstorage")
+        this.checkStorage()
+    },
     setCell(sectionIndex, cellIndex, number){
         this.logStep('note', sectionIndex, cellIndex, this.sudokuBoard[sectionIndex][cellIndex].notes, [])
         this.logStep('number', sectionIndex, cellIndex, this.sudokuBoard[sectionIndex][cellIndex].number, number)
@@ -111,7 +123,8 @@ export default {
         }else{
             this.sudokuBoard[sectionIndex][cellIndex].notes.push(number)
         }
-        this.logStep('note', sectionIndex, cellIndex, preNotes, this.sudokuBoard[sectionIndex][cellIndex].notes)
+        const curNotes = [...this.sudokuBoard[sectionIndex][cellIndex].notes]
+        this.logStep('note', sectionIndex, cellIndex, preNotes, curNotes)
     },
     checkIfIncludes(sectionIndex, cellIndex, number){
         return this.sudokuBoard[sectionIndex][cellIndex].notes.includes(number);
@@ -155,6 +168,22 @@ export default {
     },
     handleDbClick(sectionIndex, cellIndex, number){
         this.setCell(sectionIndex, cellIndex, number)
+    },
+    /* pocketbase */
+    async postCompletion(){
+        if(pb.authStore.isValid){
+            console.log("posting result")
+
+            const data = {
+                "user_id": pb.authStore.model.id,
+                "board_id": this.boardId,
+                "solve_time": this.elapsedTime,
+                "steps": this.steps
+            };
+
+            // todo trycatch
+            const record = await pb.collection('solved_boards').create(data);
+        }
     },
     /* LOGIC */
     createBoard(){
@@ -227,6 +256,9 @@ export default {
 
         if(done){
             this.sudokuSolved = true;
+            this.gameStarted = false;
+
+            this.postCompletion();
         }
         return done
     },
@@ -278,6 +310,8 @@ export default {
             this.sudokuBoard = this.convertToSubgrids(resultList.items[0].board)
             this.solvedBoard = this.convertToSubgrids(resultList.items[0].solved_board)
 
+            this.boardId = resultList.items[0].id
+
             console.log(resultList)
         }catch{
             console.error("Error loading board")
@@ -288,12 +322,26 @@ export default {
         this.boardLoading = false
     },
 
-    // actions:
-    // {add-hint, remove-hint, set-number, remove-number}
+    checkStorage(){
+        let restore = localStore.check(this.difficulty);
 
+        if(restore){
+            let gameState = localStore.get(this.difficulty);
+
+            this.elapsedTime = gameState.time
+            this.steps = gameState.steps
+
+            this.restoreSteps(this.steps);
+        }else{
+            this.boardReady = true;
+        }
+    },
+
+    /* step history */
     logStep(action, sectionIndex, cellIndex, prevNumber, number){
         const tempStep = {
             action: action,
+            time: this.elapsedTime,
             sectionIndex: sectionIndex,
             cellIndex: cellIndex,
             number: number,
@@ -301,13 +349,13 @@ export default {
         }
 
         this.steps.push(tempStep)
-        console.log(this.steps)
+        localStore.set(this.difficulty, this.steps, this.elapsedTime);
     },
 
     undoStep(){
         if(this.steps.length > 0){
             const step = this.steps.pop()
-            console.log(step)
+            console.log(step);
 
             switch (step.action) {
                 case "note":
@@ -320,11 +368,28 @@ export default {
             }
 
             this.checkForCompletion()
+            localStore.set(this.difficulty, this.steps, this.elapsedTime);
         }
     },
     
-    redoStep(){
-        console.log('asdf')
+    restoreSteps(steps){
+        if(this.boardLoading) {
+            window.setTimeout(this.restoreSteps, 100, steps);
+        } else {
+            for (var step of steps) {
+                switch (step.action) {
+                    case "note":
+                        this.sudokuBoard[step.sectionIndex][step.cellIndex].notes = step.number
+                        break;
+
+                    case "number":
+                        this.sudokuBoard[step.sectionIndex][step.cellIndex].number = step.number
+                        break;
+                }
+            }
+
+            this.boardReady = true
+        }
     }
   },
 };
