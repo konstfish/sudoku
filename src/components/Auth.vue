@@ -1,6 +1,8 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
+import IconUser from './icons/IconUser.vue'
+import IconMail from './icons/IconMail.vue'
 import IconGoogle from './icons/IconGoogle.vue'
 import PasswordInput from './PasswordInput.vue'
 </script>
@@ -17,8 +19,16 @@ import PasswordInput from './PasswordInput.vue'
     </div>
 
     <div class="input-group login-container">
-      <input type="text" v-model="inputEmail" placeholder="email" @input="checkEmail">
-      <input type="text" v-model="inputUsername" placeholder="username" @input="checkUsername" v-if="!signIn">
+      
+      <div class="inplab">
+        <label for="email"><span><IconMail /> Mail</span></label>
+        <input type="text" v-model="inputEmail" placeholder="email" @input="checkEmail" id="email">
+      </div>
+
+      <div class="inplab" v-if="!signIn">
+        <label for="username"><span><IconUser /> Username</span></label>
+        <input type="text" v-model="inputUsername" placeholder="username" @input="checkUsername" id="username">
+      </div>
 
       <PasswordInput @password-validation="handlePasswordValidation" />
 
@@ -125,16 +135,12 @@ export default {
 
   flex-direction: column;
 
-  align-items: center;
   justify-content: center;
 
   gap: 12px;
 }
 
-.auth-container > div > input{
-  border-radius: 8px;
-  padding: 6px;
-
+input{
   width: 186px;
 }
 
@@ -149,6 +155,15 @@ button{
 button:disabled{
   color: gray;
   border: 1px solid gray;
+}
+
+input{
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.spacer{
+  text-align: center;
 }
 
 /* selector */

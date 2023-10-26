@@ -1,5 +1,7 @@
 <script setup>
 import SudokuBoard from '../components/SudokuBoard.vue'
+
+import { pb } from '../lib/pocketbase'
 </script>
 
 <template>
@@ -28,9 +30,15 @@ export default {
     };
   },
   beforeMount(){
-
+    // refresh auth
+    this.refreshAuth();
   },
   methods: {
+    async refreshAuth(){
+    if (pb.authStore.isValid) {
+      await pb.collection('users').authRefresh();
+    }
+    }
   },
 };
 </script>

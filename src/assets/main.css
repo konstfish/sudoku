@@ -61,6 +61,15 @@ input{
   color: var(--color-text);
 }
 
+label,input{
+  display:flex;
+  flex-direction:column;
+}
+
+label {
+  font-size: 12px;
+}
+
 /* icons */
 svg{
   height: 16px;

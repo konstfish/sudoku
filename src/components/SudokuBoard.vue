@@ -389,6 +389,7 @@ export default {
                 }
             }
 
+            this.checkForCompletion()
             this.boardReady = true
         }
     }
