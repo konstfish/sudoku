@@ -23,8 +23,8 @@ def upload_board(difficulty):
     data = {
         "difficulty": difficulty,
         "production": 1,
-        "board": sudoku_generator.grid,
-        "solved_board": sudoku_generator.unsolved_grid
+        "board": sudoku_generator.unsolved_grid,
+        "solved_board": sudoku_generator.grid
     };
     
     try:
