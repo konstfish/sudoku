@@ -2,6 +2,8 @@
 import { pb } from '../lib/pocketbase'
 import { localStore } from '../lib/localstore'
 
+import Modal from './Modal.vue'
+
 import ConfettiExplosion from "vue-confetti-explosion";
 import Timer from './Timer.vue'
 </script>
@@ -53,8 +55,12 @@ import Timer from './Timer.vue'
         <button @click="resetBoard()">Reset Board</button>
     </div>
     <div class="timer">
-        <Timer :elapsedTime="elapsedTime" :timerStart="gameStarted" @elapsedTime="elapsedTime = $event"/>
+        <Timer :elapsedTime="elapsedTime" :timerStart="timerStarted" @elapsedTime="elapsedTime = $event"/>
     </div>
+
+    <Modal v-show="completedModal" @close="completedModal = false" @confirm="postCompletion()" width="200" height="100" :showConfirm=true>
+        Save replay?
+    </Modal>
 </div>
 </template>
 
@@ -83,7 +89,9 @@ export default {
         sudokuSolved: false,
         showWrongCells: false,
         elapsedTime: 0,
-        gameStarted: true
+        timerStarted: true,
+        gameStarted: false,
+        completedModal: false
     };
   },
   beforeMount(){
@@ -96,6 +104,11 @@ export default {
         this.sudokuSolved = false
         this.showWrongCells = false
         this.boardReady = false
+        this.steps = []
+        this.boardId = null
+        
+        // todo, actual game start & clean up unused/useless variables
+        this.timerStarted = true
         this.elapsedTime = 0
 
         console.log("populating board")
@@ -189,8 +202,13 @@ export default {
             };
 
             // todo trycatch
-            const record = await pb.collection('solved_boards').create(data);
+            try{
+                const record = await pb.collection('solved_boards').create(data);
+            }catch{
+                console.error("Error loading board")
+            }
         }
+        this.completedModal = false
     },
     /* LOGIC */
     createBoard(){
@@ -263,9 +281,12 @@ export default {
 
         if(done){
             this.sudokuSolved = true;
-            this.gameStarted = false;
+            this.timerStarted = false;
 
-            this.postCompletion();
+            // wait for confetti
+            setTimeout(() => {
+                this.completedModal = true;
+            }, 1000);
         }
         return done
     },
@@ -284,6 +305,8 @@ export default {
     },
     resetBoard(){
         this.sudokuSolved = false
+        this.elapsedTime = 0
+        this.timerStarted = true
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
                 if(!this.sudokuBoard[i][j].locked){
@@ -337,6 +360,10 @@ export default {
 
             this.elapsedTime = gameState.time
             this.steps = gameState.steps
+            this.sudokuSolved = gameState.complete
+            if(this.sudokuSolved){
+                this.timerStarted = false
+            }
 
             this.restoreSteps(this.steps);
         }else{
@@ -356,7 +383,7 @@ export default {
         }
 
         this.steps.push(tempStep)
-        localStore.set(this.difficulty, this.steps, this.elapsedTime);
+        this.updateStorage()
     },
 
     undoStep(){
@@ -375,8 +402,15 @@ export default {
             }
 
             this.checkForCompletion()
-            localStore.set(this.difficulty, this.steps, this.elapsedTime);
+            window.setTimeout(() => {
+                this.updateStorage()
+            }, 100)
         }
+    },
+
+    updateStorage(){
+        const data = {steps: this.steps, time: this.elapsedTime, complete: this.sudokuSolved}
+        localStore.set(this.difficulty, data);
     },
     
     restoreSteps(steps){
@@ -394,8 +428,9 @@ export default {
                         break;
                 }
             }
-
-            this.checkForCompletion()
+            if(!this.sudokuSolved){
+                this.checkForCompletion()
+            }
             this.boardReady = true
         }
     }

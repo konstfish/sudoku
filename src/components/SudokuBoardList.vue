@@ -45,6 +45,7 @@ export default {
     async fetchBoards(){
       const records = await pb.collection('solved_boards').getList(1, 5, {
           expand: "board_id",
+          sort: "-created"
       });
 
       console.log(records.items)

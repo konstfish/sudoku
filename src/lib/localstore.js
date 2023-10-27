@@ -6,9 +6,9 @@ export const localStore = {
     }
     return null
   },
-  set(diff, value, time) {
+  set(diff, data) {
     const key = this.createKey(diff);
-    localStorage.setItem(key, JSON.stringify({steps: value, time: time}));
+    localStorage.setItem(key, JSON.stringify(data));
   },
   remove(diff) {
     const key = this.createKey(diff);

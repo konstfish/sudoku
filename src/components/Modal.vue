@@ -6,7 +6,10 @@
           <slot></slot>
         </div>
         <div class="spacer"></div>
-        <button @click="close">Close</button>
+        <div class="action-buttons">
+          <button @click="close">Close</button>
+          <button @click="confirm" id="confirm" v-if="showConfirm">Confirm</button>
+        </div>
       </div>
     </div>
   </transition>
@@ -17,7 +20,11 @@
     name: 'Modal',
     props: {
       width: String,
-      height: String
+      height: String,
+      showConfirm: {
+        type: Boolean,
+        default: false
+      }
     },
     computed: {
       cssProps() {
@@ -29,9 +36,11 @@
     },
     methods: {
       close() {
-        console.log(this.height)
         this.$emit('close');
       },
+      confirm() {
+        this.$emit('confirm');
+      }
     },
   };
 </script>
@@ -74,7 +83,20 @@
     margin: auto;
   }
 
-  button{
+  .action-buttons{
     margin: 0;
+
+    gap: 6px;
+
+    display: flex;
+  }
+
+  button{
+    flex-grow: 1;
+    flex-basis: 0;
+  }
+
+  #confirm{
+    background-color: var(--color-accent);
   }
 </style>
