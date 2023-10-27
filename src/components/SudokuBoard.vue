@@ -13,7 +13,10 @@ import Timer from './Timer.vue'
                     :stageWidth="1000"
                     :stageHeight="1500"
                     v-if="sudokuSolved"/>
-    <div class="sudoku-board" v-bind:class="{ loading: !boardReady || boardLoading }">
+    <div class="sudoku-board" 
+        v-bind:class="{ loading: !boardReady || boardLoading }"
+        @mouseleave="handleMouseOutBoard()"
+    >
         <div v-for="(section, sectionIndex) in sudokuBoard" :key="sectionIndex" class="sudoku-board-section">
             <div v-for="(cell, cellIndex) in section" :key="cellIndex" class="sudoku-board-section-cell"
                 :selected="cell.selected"
@@ -146,6 +149,9 @@ export default {
     },
     handleMouseOut(sectionIndex, cellIndex){
         this.sudokuBoard[sectionIndex][cellIndex].selected = false
+    },
+    handleMouseOutBoard(){
+        this.curSelected = null
     },
     handleInput(sectionIndex, cellIndex, event){
         let inp = event.data;

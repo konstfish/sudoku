@@ -150,14 +150,6 @@ export default {
 :root {
     --cell-size-viewer: 32px;
 }
-
-.confetti-container{
-    position: absolute;
-    left: calc((var(--cell-size-viewer) * 4.5));
-    top: calc((var(--cell-size-viewer) * 4.5));
-    background-color: black;
-}
-
 </style>
 
 <style scoped>
