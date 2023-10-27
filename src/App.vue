@@ -9,7 +9,7 @@ import IconAbout from './components/icons/IconAbout.vue'
 <template>
   <header>
     <div class="wrapper">
-      <h1>Standard Sudoku Clone</h1>
+      <h1>SudokuHarbor</h1>
 
       <nav>
         <RouterLink to="/"><IconHome /> Home</RouterLink>
