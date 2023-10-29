@@ -62,7 +62,6 @@ export default {
     };
   },
   beforeMount(){
-    this.refreshAuth();
   },
   methods: {
     formatDate(date) {
@@ -99,11 +98,6 @@ export default {
     async logoutUser(){
         pb.authStore.clear();
     },
-    async refreshAuth(){
-      if (pb.authStore.isValid) {
-        await pb.collection('users').authRefresh();
-      }
-    }
   }
 };
 </script>

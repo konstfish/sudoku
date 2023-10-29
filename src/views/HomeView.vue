@@ -30,15 +30,8 @@ export default {
     };
   },
   beforeMount(){
-    // refresh auth
-    this.refreshAuth();
   },
   methods: {
-    async refreshAuth(){
-      if (pb.authStore.isValid) {
-        await pb.collection('users').authRefresh();
-      }
-    }
   },
 };
 </script>

@@ -7,6 +7,14 @@ import Modal from '../components/Modal.vue'
 <template>
   <div class="about">
     <h3>Made with <IconHeart /> for my Mom</h3>
+
+    <div class="donate">
+      Filler text about donations
+      <a href='https://buy.stripe.com/5kA6qz1R2g6l26k6oo'>
+        <button><IconHeart /> Donate</button>
+      </a>
+    </div>
+
     <a @click="privacyModal = !privacyModal">Privacy Policy</a>
 
     <Modal v-show="privacyModal" height=380 width=320 @close="privacyModal = false">
@@ -82,5 +90,12 @@ svg {
   overflow-y: scroll;
   height: 320px;
   width: 300px;
+}
+
+.about{
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
 }
 </style>
