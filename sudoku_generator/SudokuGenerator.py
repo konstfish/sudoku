@@ -65,9 +65,9 @@ class SudokuGenerator:
 
     def remove_numbers(self, difficulty):
         levels = {
-            1: 28,
-            2: 40,
-            3: 55
+            1: 38,
+            2: 55,
+            3: 70
         }
 
         self.unsolved_grid = [row.copy() for row in self.grid]
