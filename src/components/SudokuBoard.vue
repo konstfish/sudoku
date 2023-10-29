@@ -108,6 +108,7 @@ export default {
         curSelected: null,
         boardLoading: true,
         boardReady: false,
+        boardSolvedCheated: false,
         boardId: null,
         sudokuSolved: false,
         showWrongCells: false,
@@ -325,6 +326,8 @@ export default {
             }
         }
 
+        this.boardSolvedCheated = true
+
         this.checkForCompletion()
     },
     checkForCompletion(){
@@ -347,7 +350,7 @@ export default {
             this.timerStarted = false;
 
             // wait for confetti (if user is signed in)
-            if(pb.authStore.isValid){
+            if(pb.authStore.isValid && !this.boardSolvedCheated){
                 setTimeout(() => {
                     this.completedModal = true;
                 }, 1000);
