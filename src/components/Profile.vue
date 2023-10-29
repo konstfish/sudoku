@@ -1,6 +1,8 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
+import { formatDate } from '../lib/helpers'
+
 import SudokuBoardList from './SudokuBoardList.vue'
 
 import Modal from './Modal.vue'
@@ -57,23 +59,13 @@ export default {
       storeUser: pb.authStore.model.username,
       email: pb.authStore.model.email,
       verified: pb.authStore.model.verified,
-      registered: this.formatDate(pb.authStore.model.created),
+      registered: formatDate(pb.authStore.model.created),
       emailModal: false
     };
   },
   beforeMount(){
   },
   methods: {
-    formatDate(date) {
-      let dt = new Date(Date.parse(date));
-
-      var day = dt.getDate();
-      var month = dt.getMonth() + 1;
-      var year = dt.getFullYear();
-      var formattedDate = `${day < 10 ? '0' : ''}${day} ${month < 10 ? '0' : ''}${month} ${year}`;
-
-      return formattedDate
-    },
     async changeUsername(){
       const data = {
         "username": this.username,

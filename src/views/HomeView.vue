@@ -6,14 +6,14 @@ import { pb } from '../lib/pocketbase'
 
 <template>
   <main>
-  <div class="button-group">
-    <button v-for="option, key in options" :key="option" @click="difficulty = key" :class="{ active: difficulty == key }">
-      {{ option }}
-    </button>
-  </div>
+    <div class="button-group">
+      <button v-for="option, key in options" :key="option" @click="difficulty = key" :class="{ active: difficulty == key }">
+        {{ option }}
+      </button>
+    </div>
 
-  <!-- <SudokuBoard :difficulty='difficulty !== undefined ? Number(difficulty) : 1' /> -->
-  <SudokuBoard :difficulty='Number(difficulty)' />
+    <!-- <SudokuBoard :difficulty='difficulty !== undefined ? Number(difficulty) : 1' /> -->
+    <SudokuBoard :difficulty='Number(difficulty)' />
   </main>
 </template>
 
@@ -39,7 +39,9 @@ export default {
 
 <style scoped>
 main{
-
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .button-group {

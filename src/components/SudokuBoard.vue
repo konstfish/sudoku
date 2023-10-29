@@ -1,8 +1,12 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 import { localStore } from '../lib/localstore'
+import { generateRange } from '../lib/helpers'
+
+import { isMobile } from 'mobile-device-detect';
 
 import Modal from './Modal.vue'
+import ModalInput from './ModalInput.vue'
 
 import ConfettiExplosion from "vue-confetti-explosion";
 import Timer from './Timer.vue'
@@ -23,15 +27,23 @@ import Timer from './Timer.vue'
             <div v-for="(cell, cellIndex) in section" :key="cellIndex" class="sudoku-board-section-cell"
                 :selected="cell.selected"
                 :wrong="cell.wrong && showWrongCells"
-                @mouseenter="handleMouseOver(sectionIndex, cellIndex)"
-                @mouseleave="handleMouseOut(sectionIndex, cellIndex)"
+                @mouseenter="handleMouseEnterCell(sectionIndex, cellIndex)"
+                @mouseleave="handleMouseLeaveCell(sectionIndex, cellIndex)"
             >
-                <div class="sudoku-board-section-cell-notes" :ref="`overlay-${sectionIndex}-${cellIndex}`">
+                <div class="sudoku-board-section-cell-notes" :ref="`overlay-${sectionIndex}-${cellIndex}`" v-if="!isMobile">
                     <span v-for="number in generateRange(1, 9)" 
                         :key="number"
                         :selected="checkIfIncludes(sectionIndex, cellIndex, number)"
                         @click="handleClick(sectionIndex, cellIndex, number)"
                         @dblclick="handleDbClick(sectionIndex, cellIndex, number)"
+                    >
+                        {{ number }}
+                    </span>
+                </div>
+                <div class="sudoku-board-section-cell-notes" :ref="`overlay-${sectionIndex}-${cellIndex}`" v-if="isMobile">
+                    <span v-for="number in generateRange(1, 9)" 
+                        :key="number"
+                        :selected="checkIfIncludes(sectionIndex, cellIndex, number)"
                     >
                         {{ number }}
                     </span>
@@ -61,6 +73,13 @@ import Timer from './Timer.vue'
     <Modal v-show="completedModal" @close="completedModal = false" @confirm="postCompletion()" width="200" height="100" :showConfirm=true>
         Save replay?
     </Modal>
+
+    <ModalInput v-if="inputModal" 
+                v-show="inputModal" 
+                :cell="getCurSelected()" 
+                @close="handleInputModalClose()" 
+                @set-note="handleModalNoteClick" 
+                @set-number="handleModalNoteDbClick" />
 </div>
 </template>
 
@@ -91,10 +110,15 @@ export default {
         elapsedTime: 0,
         timerStarted: true,
         gameStarted: false,
-        completedModal: false
+        completedModal: false,
+        inputModal: false
     };
   },
   beforeMount(){
+    if(isMobile){
+        console.log("mobile", isMobile)
+    }
+
     this.initComponent();
   },
   methods: {
@@ -146,11 +170,8 @@ export default {
     checkIfIncludes(sectionIndex, cellIndex, number){
         return this.sudokuBoard[sectionIndex][cellIndex].notes.includes(number);
     },
-    generateRange(start, end) {
-      return Array.from({ length: end - start + 1 }, (_, index) => start + index);
-    },
     /* INTERFACE */
-    handleMouseOver(sectionIndex, cellIndex){
+    handleMouseEnterCell(sectionIndex, cellIndex){
         const inpName = `input-${sectionIndex}-${cellIndex}`
         if(this.curSelected != inpName){
             this.curSelected = inpName
@@ -159,11 +180,31 @@ export default {
                 this.$refs[inpName][0].focus()
             }
         }
+
+        if(isMobile){
+            setTimeout(() => {
+                this.inputModal = true
+            }, 100);
+        }
     },
-    handleMouseOut(sectionIndex, cellIndex){
+    getCurSelected(){
+        if(this.curSelected != null){
+            let idx = this.curSelected.split("-")
+
+            return this.sudokuBoard[idx[1]][idx[2]]
+        }
+        return null
+    },
+    handleMouseLeaveCell(sectionIndex, cellIndex){
         this.sudokuBoard[sectionIndex][cellIndex].selected = false
     },
     handleMouseOutBoard(){
+        if(!isMobile){
+            this.curSelected = null
+        }
+    },
+    handleInputModalClose(){
+        this.inputModal = false
         this.curSelected = null
     },
     handleInput(sectionIndex, cellIndex, event){
@@ -179,6 +220,22 @@ export default {
     },
     handleKeyDown(event){
         event.preventDefault();
+    },
+    handleModalNoteClick(number){
+        if(this.curSelected != null){
+            let idx = this.curSelected.split("-")
+
+            this.handleClick(idx[1], idx[2], number)
+        }
+    },
+    handleModalNoteDbClick(number){
+        if(this.curSelected != null){
+            this.inputModal = false
+
+            let idx = this.curSelected.split("-")
+
+            this.handleDbClick(idx[1], idx[2], number)
+        }
     },
     handleClick(sectionIndex, cellIndex, number){
         if(this.sudokuBoard[sectionIndex][cellIndex].number != null){
@@ -283,10 +340,12 @@ export default {
             this.sudokuSolved = true;
             this.timerStarted = false;
 
-            // wait for confetti
-            setTimeout(() => {
-                this.completedModal = true;
-            }, 1000);
+            // wait for confetti (if user is signed in)
+            if(pb.authStore.isValid){
+                setTimeout(() => {
+                    this.completedModal = true;
+                }, 1000);
+            }
         }
         return done
     },
@@ -443,6 +502,17 @@ export default {
     --cell-size: 52px;
 }
 
+@media screen and (max-width: 470px) {
+    :root{
+        --cell-size: 42px;
+    }
+}
+
+@media screen and (max-width: 425px) {
+    :root{
+        --cell-size: 32px;
+    }
+}
 .confetti-container{
     position: absolute;
     left: calc((var(--cell-size) * 4.5));
@@ -546,7 +616,7 @@ export default {
 }
 
 .sudoku-board-section-cell-notes > span{
-    font-size: calc(var(--cell-size-viewer) / 3);
+    font-size: calc(var(--cell-size) / 4.8);
     display: inline-block;
     display: grid;
     align-items: center;

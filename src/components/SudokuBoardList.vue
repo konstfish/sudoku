@@ -1,6 +1,8 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
+import { formatDate } from '../lib/helpers'
+
 import SudokuBoardMin from './SudokuBoardMin.vue';
 import SudokuViewer from './SudokuViewer.vue';
 import Modal from './Modal.vue';
@@ -15,9 +17,13 @@ import Modal from './Modal.vue';
             </div>
             <div class="info">
                 <h3>{{ formatDate(board.expand.board_id.created) }}</h3>
+                <h4>
+                  <span v-if="board.expand.board_id.difficulty == 1">Easy</span>
+                  <span v-if="board.expand.board_id.difficulty == 2">Medium</span>
+                  <span v-if="board.expand.board_id.difficulty == 3">Hard</span>
+                </h4>
                 <div class="stats">
-                <p>Solve time: {{ formatTime(board.solve_time) }}</p>
-                <p>Difficulty: {{ board.expand.board_id.difficulty }}</p>
+                <span>Solve time: {{ formatTime(board.solve_time) }}</span>
                 </div>
                 <button @click="showReplay(board.id)">Show Replay</button>
             </div>
@@ -63,16 +69,6 @@ export default {
       }
       this.replayVisible = true;
     },
-    formatDate(date) {
-      let dt = new Date(Date.parse(date));
-
-      var day = dt.getDate();
-      var month = dt.getMonth() + 1;
-      var year = dt.getFullYear();
-      var formattedDate = `${day < 10 ? '0' : ''}${day} ${month < 10 ? '0' : ''}${month} ${year}`;
-
-      return formattedDate
-    },
     formatTime(time){
       const seconds = time % 60;
       const minutes = Math.floor(time / 60);
@@ -106,12 +102,29 @@ export default {
 }
 
 .solved-board .info .stats{
-  margin: auto;
-  margin-top: 0px;
+  margin-bottom: auto;
 }
 
 .solved-board .info button{
   margin: 0;
 }
 
+@media screen and (max-width: 470px) {
+  .solved-board{
+    justify-content: center;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .solved-board .board{
+    align-self: center;
+    margin: 6px;
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .solved-board .info{
+    margin: 6px;
+  }
+}
 </style>
