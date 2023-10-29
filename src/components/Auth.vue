@@ -71,7 +71,14 @@ export default {
   },
   methods: {
     async oauthSignIn(provider){
-        const authData = await pb.collection('users').authWithOAuth2({ provider: provider });
+        let w = window.open()
+
+        const authData = await pb.collection('users').authWithOAuth2({ 
+          provider: provider,
+          urlCallback: (url) => {
+            w.location.href = url
+          },
+        });
         console.log(authData)
 
         console.log(pb.authStore.isValid);
