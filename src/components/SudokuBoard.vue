@@ -58,8 +58,8 @@ import Timer from './Timer.vue'
     </div>
     <div class="sudoku-controls">
         <button @click="solveBoard()">Solve</button>
-        <button @click="checkForError()">Check for Errors</button>
-        <button @click="showWrongCells = !showWrongCells">Show Errors ({{showWrongCells}})</button>
+        <button @click="alertError()">Check for Errors</button>
+        <button @click="showError()">Show Errors</button>
 
         <div class="spacer"></div>
 
@@ -69,6 +69,10 @@ import Timer from './Timer.vue'
     <div class="timer">
         <Timer :elapsedTime="elapsedTime" :timerStart="timerStarted" @elapsedTime="elapsedTime = $event"/>
     </div>
+
+    <Modal v-show="infoModal" @close="infoModal = false" width="200" height="100">
+        {{infoModalContent}}
+    </Modal>
 
     <Modal v-show="completedModal" @close="completedModal = false" @confirm="postCompletion()" width="200" height="100" :showConfirm=true>
         Save replay?
@@ -111,7 +115,9 @@ export default {
         timerStarted: true,
         gameStarted: false,
         completedModal: false,
-        inputModal: false
+        inputModal: false,
+        infoModal: false,
+        infoModalContent: ""
     };
   },
   beforeMount(){
@@ -353,19 +359,39 @@ export default {
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
                 if(this.sudokuBoard[i][j].wrong){
-                    alert('Error made on Board')
-                    console.log(i, j)
                     return true
                 }
             }
         }
-        alert("No errors so far")
         return false
+    },
+    alertError(){
+        if(this.checkForError()){
+            this.infoModalContent = "Error found on board!"
+        }else{
+            this.infoModalContent = "No errors so far!"
+        }
+        this.infoModal = true
+    },
+    showError(){
+        if(this.checkForError()){
+            this.showWrongCells = true
+
+            // hide again in 10 seconds
+            window.setTimeout(() => {
+                this.showWrongCells = false
+            }, 10 * 1000)
+        }else{
+            this.alertError()
+        }
     },
     resetBoard(){
         this.sudokuSolved = false
         this.elapsedTime = 0
         this.timerStarted = true
+        this.steps = []
+
+        localStore.remove(this.difficulty)
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
                 if(!this.sudokuBoard[i][j].locked){
@@ -639,6 +665,8 @@ input{
     cursor: default;
     caret-color: transparent;
     box-sizing: border-box;
+
+    transition: 0.2s;
 }
 
 input:read-only{
