@@ -90,13 +90,13 @@ import Timer from './Timer.vue'
 <script>
 export default {
   props: {
-    difficulty: {
-        type: Number,
+    boardId: {
+        type: [String, null],
         required: true
     }
   },
   watch: {
-    difficulty(){
+    boardId(){
         this.initComponent();
     }
   },
@@ -109,7 +109,7 @@ export default {
         boardLoading: true,
         boardReady: false,
         boardSolvedCheated: false,
-        boardId: null,
+        difficulty: 1,
         sudokuSolved: false,
         showWrongCells: false,
         elapsedTime: 0,
@@ -136,8 +136,7 @@ export default {
         this.showWrongCells = false
         this.boardReady = false
         this.steps = []
-        this.boardId = null
-        
+
         // todo, actual game start & clean up unused/useless variables
         this.timerStarted = true
         this.elapsedTime = 0
@@ -145,11 +144,13 @@ export default {
         console.log("populating board")
         this.sudokuBoard = this.createBoard()
 
-        console.log("fetch board")
-        this.fetchBoard();
+        if(this.boardId){
+            console.log("fetch board")
+            this.fetchBoard();
 
-        console.log("check localstorage")
-        this.checkStorage()
+            console.log("check localstorage")
+            this.checkStorage()
+        }
     },
     setCell(sectionIndex, cellIndex, number){
         this.logStep('note', sectionIndex, cellIndex, this.sudokuBoard[sectionIndex][cellIndex].notes, [])
@@ -394,7 +395,7 @@ export default {
         this.timerStarted = true
         this.steps = []
 
-        localStore.remove(this.difficulty)
+        localStore.remove(this.boardId)
         for (let i = 0; i < this.sudokuBoard.length; i++) {
             for (let j = 0; j < this.sudokuBoard[i].length; j++) {
                 if(!this.sudokuBoard[i][j].locked){
@@ -410,41 +411,29 @@ export default {
         }
     },
     async fetchBoard(){
-        let today = new Date();
-        let tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
+        console.log(this.boardId)
+        if(this.boardId){
+            try{
+                const record = await pb.collection('boards').getOne(this.boardId);
 
-        today = today.toISOString().split('T')[0];
-        tomorrow = tomorrow.toISOString().split('T')[0];
+                this.sudokuBoard = this.convertToSubgrids(record.board)
+                this.solvedBoard = this.convertToSubgrids(record.solved_board)
 
-        const query = `created >= "${today}" && created <= "${tomorrow}" && difficulty = ${this.difficulty}`
+                this.difficulty = record.difficulty
 
-        // console.log(query)
-        try{
-            const resultList = await pb.collection('boards').getList(1, 1, {
-                filter: query,
-            });
-
-            this.sudokuBoard = this.convertToSubgrids(resultList.items[0].board)
-            this.solvedBoard = this.convertToSubgrids(resultList.items[0].solved_board)
-
-            this.boardId = resultList.items[0].id
-
-            console.log(resultList)
-        }catch{
-            console.error("Error loading board")
+                this.matchSolvedBoard()
+                this.boardLoading = false
+            }catch{
+                console.error("Error loading board")
+            }
         }
-
-        this.matchSolvedBoard()
-
-        this.boardLoading = false
     },
 
     checkStorage(){
-        let restore = localStore.check(this.difficulty);
+        let restore = localStore.check(this.boardId);
 
         if(restore){
-            let gameState = localStore.get(this.difficulty);
+            let gameState = localStore.get(this.boardId);
 
             this.elapsedTime = gameState.time
             this.steps = gameState.steps
@@ -498,7 +487,7 @@ export default {
 
     updateStorage(){
         const data = {steps: this.steps, time: this.elapsedTime, complete: this.sudokuSolved}
-        localStore.set(this.difficulty, data);
+        localStore.set(this.boardId, data);
     },
     
     restoreSteps(steps){

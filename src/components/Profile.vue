@@ -3,7 +3,7 @@ import { pb } from '../lib/pocketbase'
 
 import { formatDate } from '../lib/helpers'
 
-import SudokuBoardList from './SudokuBoardList.vue'
+import SudokuBoardListProfile from './SudokuBoardListProfile.vue'
 
 import Modal from './Modal.vue'
 
@@ -46,7 +46,7 @@ import IconClock from './icons/IconClock.vue'
 
     <hr>
 
-    <SudokuBoardList />
+    <SudokuBoardListProfile />
   </div>
 </template>
 

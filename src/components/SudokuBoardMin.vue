@@ -30,7 +30,7 @@ export default {
     },
     solvedBoardInp: {
         type: Object,
-        required: true
+        required: false
     },
   },
   watch: {
@@ -52,10 +52,11 @@ export default {
     },
     loadBoards(){
         this.sudokuBoard = this.convertToSubgrids(this.sudokuBoardInp);
-        this.solvedBoard = this.convertToSubgrids(this.solvedBoardInp);
-        this.solveBoard()
+        if(this.solvedBoardInp){
+            this.solvedBoard = this.convertToSubgrids(this.solvedBoardInp);
+            this.solveBoard()
+        }
         this.boardLoading = false
-        console.log(this.sudokuBoard)
     },
     generateRange(start, end) {
       return Array.from({ length: end - start + 1 }, (_, index) => start + index);

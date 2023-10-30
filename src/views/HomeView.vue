@@ -1,5 +1,6 @@
 <script setup>
 import SudokuBoard from '../components/SudokuBoard.vue'
+import Comments from '../components/Comments.vue'
 
 import { pb } from '../lib/pocketbase'
 </script>
@@ -7,13 +8,14 @@ import { pb } from '../lib/pocketbase'
 <template>
   <main>
     <div class="button-group">
-      <button v-for="option, key in options" :key="option" @click="difficulty = key" :class="{ active: difficulty == key }">
+      <button v-for="option, key in options" :key="option" @click="optionSelected = key" :class="{ active: optionSelected == key }">
         {{ option }}
       </button>
     </div>
 
-    <!-- <SudokuBoard :difficulty='difficulty !== undefined ? Number(difficulty) : 1' /> -->
-    <SudokuBoard :difficulty='Number(difficulty)' />
+    <SudokuBoard :boardId='optionsId[optionSelected]' />
+
+    <!--<Comments />-->
   </main>
 </template>
 
@@ -26,12 +28,43 @@ export default {
           2: "Medium",
           3: "Hard"
         },
-        difficulty: 1,
+        optionsId: {
+          1: null,
+          2: null,
+          3: null
+        },
+        optionSelected: 1,
     };
   },
   beforeMount(){
+    this.fetchBoards()
   },
   methods: {
+    async fetchBoards(){
+      let today = new Date();
+      let tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      today = today.toISOString().split('T')[0];
+      tomorrow = tomorrow.toISOString().split('T')[0];
+
+      console.log(today, tomorrow)
+
+      const query = `created >= "${today}" && created <= "${tomorrow}"`
+
+      try{
+          const resultList = await pb.collection('boards').getList(1, 3, {
+              filter: query,
+              sort: 'created'
+          });
+          
+          for (let board of resultList.items) {
+              this.optionsId[board.difficulty] = board.id
+          }
+      }catch(err){
+          console.error(err)
+      }
+    }
   },
 };
 </script>
