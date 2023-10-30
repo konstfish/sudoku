@@ -46,3 +46,14 @@ export function formatDateExact(inpDate){
         return null;
     }
 }
+
+export function formatTime(inpTime){
+    try {
+        const seconds = inpTime % 60;
+        const minutes = Math.floor(inpTime / 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    } catch (e) {
+        console.error(e.message);
+        return null;
+    }
+}

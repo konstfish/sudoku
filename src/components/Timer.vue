@@ -1,3 +1,8 @@
+<script setup>
+import { formatTime } from '../lib/helpers'
+</script>
+
+
 <template>
   <span>{{ formattedTime }}</span>
 </template>
@@ -27,9 +32,7 @@ export default {
   },
   computed: {
     formattedTime() {
-      const seconds = this.localElapsedTime % 60;
-      const minutes = Math.floor(this.localElapsedTime / 60);
-      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      return formatTime(this.localElapsedTime)
     },
   },
   methods: {

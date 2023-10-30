@@ -1,18 +1,39 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
-import { formatDateExact } from '../lib/helpers'
+import { formatDateExact, formatTime } from '../lib/helpers'
+
+import IconCheck from './icons/IconCheck.vue'
+import IconClock from './icons/IconClock.vue'
 </script>
 
 <template>
     <div class="comments">
         <div class="comment-input">
-            {{ userSignedIn }}
         </div>
+        <span v-if="commentsLoading">Loading...</span>
         <div class="comment-list">
+            <div v-for="comment in comments" :key="comment" class="comment section">
+                <div class="comment-about">
+                    <div class="comment-head">
+                        <span class="comment-user">
+                            {{ comment.expand.user_id.username }} <span v-if="comment.expand.user_id.verified" class="check"><IconCheck /></span>
+                        </span>
 
+                        <span class="comment-created">{{ formatDateExact(comment.created) }}</span>
+                    </div>
+                    <span class="comment-solve-time" v-if="comment.show_time">
+                        <IconClock />{{ formatTime(comment.solve_time) }}
+                    </span>
+                </div>
+                <div class="comment-text">
+                    {{ comment.text }}
+                </div>
+                <div class="comment-replay" v-if="comment.show_replay">
+                    <!-- todo -->
+                </div>
+            </div>
         </div>
-        <span v-if="comments">Loading...</span>
 
     </div>
 </template>
@@ -21,23 +42,27 @@ import { formatDateExact } from '../lib/helpers'
 export default {
   data() {
     return {
-      userSignedIn: pb.authStore.isValid
+      userSignedIn: pb.authStore.isValid,
+      commentsLoading: true,
+      comments: []
     };
   },
   beforeMount(){
-    this.fetchBoards();
+    this.fetchComments();
   },
   methods: {
-    async fetchBoards(){
-      /*const records = await pb.collection('comments').getList(1, 10, {
-          expand: "board_id",
-          sort: "-created"
-      });
+    async fetchComments(){
+        const records = await pb.collection('comments').getList(1, 10, {
+            expand: "user_id",
+            sort: "-created"
+        });
 
-      console.log(records.items)
+        this.comments = records.items
 
-      this.solvedBoards = records.items
-      this.boardsLoading = false*/
+        this.commentsLoading = false
+
+        this.solvedBoards = records.items
+        this.boardsLoading = false
     },
     showReplay(boardId){
       const temp = this.solvedBoards.find(obj => obj.id === boardId);
@@ -63,48 +88,23 @@ export default {
 </script>
 
 <style scoped>
-.solved-board{
-  height: 240px;
-
-  display: flex;
-}
-
-.solved-board .board{
-  margin-right: 12px;
-  padding-right: 12px;
-  border-right: 1px solid var(--color-background-sec);
-}
-
-.solved-board .info{
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column; 
-}
-
-.solved-board .info .stats{
-  margin-bottom: auto;
-}
-
-.solved-board .info button{
-  margin: 0;
-}
-
-@media screen and (max-width: 470px) {
-  .solved-board{
-    justify-content: center;
-    height: auto;
+.comment-list{
+    display: flex;
     flex-direction: column;
-  }
 
-  .solved-board .board{
-    align-self: center;
-    margin: 6px;
-    padding-right: 0;
-    border-right: none;
-  }
+    width: calc(var(--cell-size) * 9 + 4px);
+}
 
-  .solved-board .info{
-    margin: 6px;
-  }
+.comment-head{
+    display: flex;
+    justify-content: space-between;
+}
+
+.comment-user{
+    font-weight: bold;
+}
+
+.check{
+    color: var(--color-accent);
 }
 </style>

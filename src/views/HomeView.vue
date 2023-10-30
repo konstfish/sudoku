@@ -15,7 +15,7 @@ import { pb } from '../lib/pocketbase'
 
     <SudokuBoard :boardId='optionsId[optionSelected]' />
 
-    <!--<Comments />-->
+    <Comments />
   </main>
 </template>
 
