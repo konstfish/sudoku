@@ -52,7 +52,8 @@ import Timer from './Timer.vue'
                     @input="handleInput(sectionIndex, cellIndex, $event)"
                     :value="cell.number" 
                     :ref="`input-${sectionIndex}-${cellIndex}`"
-                    v-bind:readonly="cell.locked ? 'readonly' : null">
+                    v-bind:readonly="cell.locked ? 'readonly' : null"
+                    v-bind:inputmode="isMobile ? 'none' : null">
             </div>
         </div>
     </div>
@@ -185,7 +186,9 @@ export default {
             this.curSelected = inpName
             if(!this.sudokuBoard[sectionIndex][cellIndex].locked){
                 this.sudokuBoard[sectionIndex][cellIndex].selected = true
-                this.$refs[inpName][0].focus()
+                if(!isMobile){
+                    this.$refs[inpName][0].focus()
+                }
             }
         }
 
