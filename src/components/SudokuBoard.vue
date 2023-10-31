@@ -1,6 +1,7 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 import { localStore } from '../lib/localstore'
+import { solveBus } from '../lib/solveBus' 
 import { generateRange } from '../lib/helpers'
 
 import { isMobile } from 'mobile-device-detect';
@@ -357,6 +358,7 @@ export default {
             if(pb.authStore.isValid && !this.boardSolvedCheated){
                 setTimeout(() => {
                     this.completedModal = true;
+                    solveBus.emit('boardSolved', {boardId: this.boardId, elapsedTime: this.elapsedTime});
                 }, 1000);
             }
         }

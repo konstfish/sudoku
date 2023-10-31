@@ -1,28 +1,28 @@
 export const localStore = {
-  get(diff) {
-    if(this.check(diff)){
-      const key = this.createKey(diff);
+  get(id) {
+    if(this.check(id)){
+      const key = this.createKey(id);
       return JSON.parse(localStorage.getItem(key));
     }
     return null
   },
-  set(diff, data) {
-    const key = this.createKey(diff);
+  set(id, data) {
+    const key = this.createKey(id);
     localStorage.setItem(key, JSON.stringify(data));
   },
-  remove(diff) {
-    const key = this.createKey(diff);
+  remove(id) {
+    const key = this.createKey(id);
     localStorage.removeItem(key);
   },
-  check(diff) {
-    const key = this.createKey(diff);
+  check(id) {
+    const key = this.createKey(id);
     return localStorage.getItem(key) !== null;
   },
-  createKey(difficulty){
+  createKey(id){
     let date = new Date();
     date = date.toISOString().split('T')[0];
 
-    return `${date}-${difficulty}`
+    return `${date}-${id}`
   },
   deleteOldKeys(){
     const currentDate = new Date();
@@ -35,7 +35,7 @@ export const localStore = {
   
       if (keyParts.length === 2) {
         const keyDate = new Date(keyParts[0]);
-        const difficulty = parseInt(keyParts[1]);
+        const id = parseInt(keyParts[1]);
   
         if (keyDate < threeDaysAgo) {
           localStorage.removeItem(key);

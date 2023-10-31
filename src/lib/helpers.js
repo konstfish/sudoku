@@ -57,3 +57,16 @@ export function formatTime(inpTime){
         return null;
     }
 }
+
+export function getDayRangeQuery(){
+    let today = new Date();
+    let tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    today = today.toISOString().split('T')[0];
+    tomorrow = tomorrow.toISOString().split('T')[0];
+
+    const query = `created >= "${today}" && created <= "${tomorrow}"`
+
+    return query
+}

@@ -1,11 +1,13 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
-import { formatDate } from '../lib/helpers'
+import { formatDate, formatTime } from '../lib/helpers'
 
 import SudokuBoardMin from './SudokuBoardMin.vue';
 import SudokuViewer from './SudokuViewer.vue';
 import Modal from './Modal.vue';
+
+import IconClock from './icons/IconClock.vue'
 </script>
 
 <template>
@@ -16,14 +18,14 @@ import Modal from './Modal.vue';
                 <SudokuBoardMin :sudokuBoardInp="board.expand.board_id.board" :solvedBoardInp="board.expand.board_id.solved_board" />
             </div>
             <div class="info">
-                <h3>{{ formatDate(board.expand.board_id.created) }}</h3>
-                <h4>
+                <h3>
+                  <span>{{ formatDate(board.expand.board_id.created) }} | </span>
                   <span v-if="board.expand.board_id.difficulty == 1">Easy</span>
                   <span v-if="board.expand.board_id.difficulty == 2">Medium</span>
                   <span v-if="board.expand.board_id.difficulty == 3">Hard</span>
-                </h4>
+                </h3>
                 <div class="stats">
-                <span>Solve time: {{ formatTime(board.solve_time) }}</span>
+                <span><IconClock /> {{ formatTime(board.solve_time) }}</span>
                 </div>
                 <button @click="showReplay(board.id)">Show Replay</button>
             </div>
@@ -68,11 +70,6 @@ export default {
         solve_time: temp.solve_time
       }
       this.replayVisible = true;
-    },
-    formatTime(time){
-      const seconds = time % 60;
-      const minutes = Math.floor(time / 60);
-      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
     closeModal(){
       this.boardData = null;

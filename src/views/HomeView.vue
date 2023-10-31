@@ -3,6 +3,8 @@ import SudokuBoard from '../components/SudokuBoard.vue'
 import Comments from '../components/Comments.vue'
 
 import { pb } from '../lib/pocketbase'
+
+import { getDayRangeQuery } from '../lib/helpers'
 </script>
 
 <template>
@@ -15,7 +17,7 @@ import { pb } from '../lib/pocketbase'
 
     <SudokuBoard :boardId='optionsId[optionSelected]' />
 
-    <Comments />
+    <Comments :boardId='optionsId[optionSelected]' />
   </main>
 </template>
 
@@ -41,16 +43,7 @@ export default {
   },
   methods: {
     async fetchBoards(){
-      let today = new Date();
-      let tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-
-      today = today.toISOString().split('T')[0];
-      tomorrow = tomorrow.toISOString().split('T')[0];
-
-      console.log(today, tomorrow)
-
-      const query = `created >= "${today}" && created <= "${tomorrow}"`
+      const query = getDayRangeQuery()
 
       try{
           const resultList = await pb.collection('boards').getList(1, 3, {
