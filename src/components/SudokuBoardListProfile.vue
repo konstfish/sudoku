@@ -12,7 +12,7 @@ import IconClock from './icons/IconClock.vue'
 
 <template>
     <div class="solved-boards">
-        <span v-if="boardsLoading">Loading...</span>
+        <span v-if="boardsLoadingInit">Loading...</span>
         <div v-for="board in solvedBoards" :key="board" class="solved-board section">
             <div class="board">
                 <SudokuBoardMin :sudokuBoardInp="board.expand.board_id.board" :solvedBoardInp="board.expand.board_id.solved_board" />
@@ -40,26 +40,50 @@ import IconClock from './icons/IconClock.vue'
 export default {
   data() {
     return {
+      boardsLoadingInit: true,
       boardsLoading: true,
+      boardsToLoad: true,
       solvedBoards: [],
       replayVisible: false,
-      boardData: null
+      boardData: null,
+      currentPage: 1
     };
   },
   beforeMount(){
     this.fetchBoards();
+    window.addEventListener('scroll', this.checkScroll);
+  },
+  beforeDestroy(){
+    window.removeEventListener('scroll', this.checkScroll);
   },
   methods: {
     async fetchBoards(){
-      const records = await pb.collection('solved_boards').getList(1, 5, {
+      this.boardsLoading = true
+
+      const records = await pb.collection('solved_boards').getList(this.currentPage, 3, {
           expand: "board_id",
           sort: "-created"
       });
 
-      console.log(records.items)
+      console.log(this.currentPage, records.items)
 
-      this.solvedBoards = records.items
+      if(records.items.length == 0){
+        this.boardsToLoad = false
+      }else{
+        this.solvedBoards = [...this.solvedBoards, ...records.items];
+      }
+
+      this.currentPage += 1
+
+      this.boardsLoadingInit = false
       this.boardsLoading = false
+    },
+    checkScroll() {
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+
+      if (nearBottom && !this.boardsLoading && !this.boardsLoadingInit && this.boardsToLoad) {
+        this.fetchBoards();
+      }
     },
     showReplay(boardId){
       const temp = this.solvedBoards.find(obj => obj.id === boardId);

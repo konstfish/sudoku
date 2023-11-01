@@ -14,7 +14,7 @@ import IconAbout from './components/icons/IconAbout.vue'
 <template>
   <header>
     <div class="wrapper">
-      <h1>SudokuHarbor</h1>
+      <h1>Sudoku Harbor</h1>
 
       <nav>
         <RouterLink to="/"><IconHome /> Home</RouterLink>
@@ -41,7 +41,7 @@ export default {
       if (pb.authStore.isValid) {
         await pb.collection('users').authRefresh();
 
-        LogRocket.identify('THE_USER_ID_IN_YOUR_APP', {
+        LogRocket.identify(pb.authStore.model.id, {
           name: pb.authStore.model.username,
           email: pb.authStore.model.email,
 

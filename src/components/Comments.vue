@@ -87,7 +87,7 @@ export default {
   },
   data() {
     return {
-      commentsReady: true,
+      commentsReady: false,
       userSignedIn: pb.authStore.isValid,
       commentsLoading: true,
       comments: [],

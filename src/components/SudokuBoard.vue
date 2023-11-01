@@ -174,6 +174,8 @@ export default {
         }else{
             this.sudokuBoard[sectionIndex][cellIndex].notes.push(number)
         }
+        /* rewrite this at some point */
+        this.sudokuBoard[sectionIndex][cellIndex].wrong = false
         const curNotes = [...this.sudokuBoard[sectionIndex][cellIndex].notes]
         this.logStep('note', sectionIndex, cellIndex, preNotes, curNotes)
     },
