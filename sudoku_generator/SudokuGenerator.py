@@ -1,4 +1,5 @@
 import random
+from difficulty import levels
 
 class SudokuGenerator:
     
