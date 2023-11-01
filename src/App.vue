@@ -9,6 +9,7 @@ import { pb } from './lib/pocketbase'
 import IconHome from './components/icons/IconHome.vue'
 import IconUser from './components/icons/IconUser.vue'
 import IconAbout from './components/icons/IconAbout.vue'
+import IconHistory from './components/icons/IconHistory.vue'
 </script>
 
 <template>
@@ -18,6 +19,7 @@ import IconAbout from './components/icons/IconAbout.vue'
 
       <nav>
         <RouterLink to="/"><IconHome /> Home</RouterLink>
+        <RouterLink to="/history"><IconHistory /> Board History</RouterLink>
         <RouterLink to="/profile"><IconUser /> Profile</RouterLink>
         <RouterLink to="/about"><IconAbout /> About</RouterLink>
       </nav>

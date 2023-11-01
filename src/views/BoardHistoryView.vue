@@ -3,36 +3,40 @@ import { pb } from '../lib/pocketbase'
 
 import { formatDate, formatTime } from '../lib/helpers'
 
-import SudokuBoardMin from './SudokuBoardMin.vue';
-import SudokuViewer from './SudokuViewer.vue';
-import Modal from './Modal.vue';
+import SudokuBoardMin from '../components/SudokuBoardMin.vue';
+import SudokuViewer from '../components/SudokuViewer.vue';
+import Modal from '../components/Modal.vue';
 
-import IconClock from './icons/IconClock.vue'
+import IconClock from '../components/icons/IconClock.vue'
 </script>
 
 <template>
-    <div class="solved-boards">
+    <span v-if="!pb.authStore.isValid">Please sign in to view & play past Sudoku boards</span>
+    <div v-else class="wrapper">
+      <div class="solved-boards">
         <span v-if="boardsLoadingInit">Loading...</span>
-        <div v-for="board in solvedBoards" :key="board" class="solved-board section">
+        <div v-for="board in boardHistory" :key="board" class="solved-board section">
             <div class="board">
-                <SudokuBoardMin :sudokuBoardInp="board.expand.board_id.board" :solvedBoardInp="board.expand.board_id.solved_board" />
+                <SudokuBoardMin :sudokuBoardInp="board.board" />
             </div>
             <div class="info">
                 <h3>
-                  <span>{{ formatDate(board.expand.board_id.created) }} | </span>
-                  <span v-if="board.expand.board_id.difficulty == 1">Easy</span>
-                  <span v-if="board.expand.board_id.difficulty == 2">Medium</span>
-                  <span v-if="board.expand.board_id.difficulty == 3">Hard</span>
+                  <span>{{ formatDate(board.created) }} | </span>
+                  <span v-if="board.difficulty == 1">Easy</span>
+                  <span v-if="board.difficulty == 2">Medium</span>
+                  <span v-if="board.difficulty == 3">Hard</span>
                 </h3>
                 <div class="stats">
-                <span><IconClock /> {{ formatTime(board.solve_time) }}</span>
                 </div>
-                <button @click="showReplay(board.id)">Show Replay</button>
+                <router-link :to="{ name: 'board', params: { id: board.id }}">
+                  <button>Play Board</button>
+                </router-link>
             </div>
         </div>
         <Modal v-show="replayVisible" width="320" height="400" @close="closeModal()">
           <SudokuViewer v-if="boardData" :boardData="boardData" />
         </Modal>
+      </div>
     </div>
 </template>
 
@@ -43,7 +47,7 @@ export default {
       boardsLoadingInit: true,
       boardsLoading: true,
       boardsToLoad: true,
-      solvedBoards: [],
+      boardHistory: [],
       replayVisible: false,
       boardData: null,
       currentPage: 1
@@ -60,25 +64,26 @@ export default {
   },
   methods: {
     async fetchBoards(){
-      this.boardsLoading = true
+      if(pb.authStore.isValid){
+        this.boardsLoading = true
 
-      const records = await pb.collection('solved_boards').getList(this.currentPage, 3, {
-          expand: "board_id",
-          sort: "-created"
-      });
+        const records = await pb.collection('boards').getList(this.currentPage, 3, {
+            sort: "-created"
+        });
 
-      console.log(this.currentPage, records.items)
+        console.log(this.currentPage, records.items)
 
-      if(records.items.length == 0){
-        this.boardsToLoad = false
-      }else{
-        this.solvedBoards = [...this.solvedBoards, ...records.items];
+        if(records.items.length == 0){
+          this.boardsToLoad = false
+        }else{
+          this.boardHistory = [...this.boardHistory, ...records.items];
+        }
+
+        this.currentPage += 1
+
+        this.boardsLoadingInit = false
+        this.boardsLoading = false
       }
-
-      this.currentPage += 1
-
-      this.boardsLoadingInit = false
-      this.boardsLoading = false
     },
     checkScroll() {
       const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
