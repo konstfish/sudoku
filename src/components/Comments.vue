@@ -10,6 +10,8 @@ import IconReplay from './icons/IconReplay.vue'
 
 
 import IconCheck from './icons/IconCheck.vue'
+import IconHeart from './icons/IconHeart.vue'
+import IconTrash from './icons/IconTrash.vue'
 import IconClock from './icons/IconClock.vue'
 </script>
 
@@ -28,13 +30,19 @@ import IconClock from './icons/IconClock.vue'
                 <div class="comment-input-options">
                     <div class="comment-input-options-check">
                         <div class="comment-input-options-check-single">
-                            <label for="text"><span><IconClock /> Show Solve Time</span></label>
-                            <input type="checkbox" id="showSolveTime" v-model="showSolveTime">
+                            <label for="showSolveTime">
+                                <span><IconClock /> Show Solve time</span>
+                                <input type="checkbox" class="checkbox" id="showSolveTime" v-model="showSolveTime">
+                                <span class="switch"></span>
+                            </label>
                         </div>
 
                         <div class="comment-input-options-check-single">
-                            <label for="text"><span><IconReplay /> Show Replay</span></label>
-                            <input type="checkbox" id="showReplay" v-model="showReplay">
+                            <label for="showReplay">
+                                <span><IconReplay /> Show Replay</span>
+                                <input type="checkbox" class="checkbox" id="showReplay" v-model="showReplay">
+                                <span class="switch"></span>
+                            </label>
                         </div>
                     </div>
 
@@ -51,10 +59,21 @@ import IconClock from './icons/IconClock.vue'
                 <div class="comment-about">
                     <div class="comment-head">
                         <span class="comment-user">
-                            {{ comment.expand.user_id.username }} <span v-if="comment.expand.user_id.verified" class="check"><IconCheck /></span>
+                            {{ comment.expand.user_id.username }}
+                            <span class="badge-container">
+                                <span v-if="comment.expand.user_id.verified" class="badge comment-user-verified"><IconCheck /></span>
+                                <span class="badge-label">Verified</span>
+                            </span>
+                            <span class="badge-container">
+                                <span v-if="comment.expand.user_id.supporter" class="badge comment-user-supporter"><IconHeart /></span>
+                                <span class="badge-label">Supporter</span>
+                            </span>
                         </span>
 
-                        <span class="comment-created">{{ formatDateExact(comment.created) }}</span>
+                        <span class="comment-created">
+                            {{ formatDateExact(comment.created) }}
+                            <span v-if="comment.expand.user_id.id == pb.authStore.model.id" @click="deleteComment(comment.id)" class="comment-trash"><IconTrash /></span>
+                        </span>
                     </div>
                     <span class="comment-solve-time" v-if="comment.show_time">
                         <IconClock />{{ formatTime(comment.solve_time) }}
@@ -87,7 +106,7 @@ export default {
   },
   data() {
     return {
-      commentsReady: false,
+      commentsReady: true,
       userSignedIn: pb.authStore.isValid,
       commentsLoading: true,
       comments: [],
@@ -97,7 +116,6 @@ export default {
       showReplay: false,
       boardComplete: false,
       solve_time: null,
-      boardIdStorage: null
     };
   },
   beforeMount(){
@@ -105,15 +123,16 @@ export default {
   },
   created(){
     solveBus.on('boardSolved', this.handleSolveEvent);
+    solveBus.on('boardUnsolved', this.handleUnsolveEvent);
   },
   beforeDestroy(){
     solveBus.off('boardSolved', this.handleSolveEvent);
+    solveBus.off('boardUnsolved', this.handleUnsolveEvent);
   },
   methods: {
     initComponent(){
         if(this.boardId != null){
             this.fetchComments();
-            this.boardIdStorage = localStore.createKey(this.boardId)
         }
     },
     async fetchComments(){       
@@ -134,6 +153,9 @@ export default {
             console.log(err)
         }
     },
+    async fetchUserComment(){
+        // todo, place on top of list
+    },
     async submitComment(){
         try{
             const data = {
@@ -152,12 +174,25 @@ export default {
             console.log(err);
         }
     },
+    async deleteComment(commentId){
+        console.log(commentId)
+        try{
+            await pb.collection('comments').delete(commentId);
+
+            this.fetchComments()
+        }catch(err){
+            console.log(err)
+        }
+    },
     handleSolveEvent(event) {
         if(this.boardId == event.boardId){
             this.elapsedTime = event.elapsedTime
             this.boardComplete = true
         }
     },
+    handleUnsolveEvent(event){
+        this.boardComplete = false
+    }
   }
 };
 </script>
@@ -182,9 +217,11 @@ export default {
 .blur{
     filter: blur(4px);
     transition: 0.2s;
+    pointer-events: none;
 }
 
 .comment-input{
+    margin-top: 42px;
     transition: 0.2s;
     
     width: calc(var(--cell-size) * 9 - 14px);
@@ -221,6 +258,47 @@ textarea{
     height: 24px;
 }
 
+
+.switch { 
+   position : relative ;
+   display : inline-block;
+   width : 32px;
+   height : 18px;
+   background-color: var(--color-background);
+   border: 1px solid var(--color-background-sec);
+   border-radius: 20px;
+ }
+
+ .switch::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--color-text);
+  top: 1px; 
+  left: 1px;
+  transition: all 0.3s;
+}
+
+.checkbox:checked + .switch::before {
+  left : 15px; 
+}
+.checkbox:checked + .switch {
+  background-color: var(--color-accent);
+}
+
+.checkbox { 
+   display : none;
+}
+
+label{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
 /* comment list */
 .comment-list{
     display: flex;
@@ -236,9 +314,39 @@ textarea{
 
 .comment-user{
     font-weight: bold;
+    display: flex;
+    gap: 2px;
 }
 
-.check{
+.comment-user-verified{
     color: var(--color-accent);
+}
+
+.comment-user-supporter{
+    color: var(--color-accent-sec);
+}
+
+.badge-container {
+position: relative;
+display: inline-block; /* or block depending on your layout */
+}
+
+.badge-label {
+  position: absolute;
+  margin-top: 2px;
+  margin-left: 2px;
+  background-color: var(--color-background-sec);
+  color: white;
+  padding: 2px 5px;
+  font-size: 10px;
+  border-radius: 3px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  user-select: none;
+}
+
+.badge-container:hover .badge-label{
+    opacity: 1;
 }
 </style>

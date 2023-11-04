@@ -1,30 +1,28 @@
 export const localStore = {
   get(id) {
     if(this.check(id)){
-      const key = this.createKey(id);
-      return JSON.parse(localStorage.getItem(key));
+      return JSON.parse(localStorage.getItem(id));
     }
     return null
   },
   set(id, data) {
-    const key = this.createKey(id);
-    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(id, JSON.stringify(data));
   },
   remove(id) {
-    const key = this.createKey(id);
-    localStorage.removeItem(key);
+    localStorage.removeItem(id);
   },
   check(id) {
-    const key = this.createKey(id);
-    return localStorage.getItem(key) !== null;
+    return localStorage.getItem(id) !== null;
   },
-  createKey(id){
+  /*createKey(id){
     let date = new Date();
     date = date.toISOString().split('T')[0];
 
     return `${date}-${id}`
   },
   deleteOldKeys(){
+
+    // rewrite this
     const currentDate = new Date();
     const threeDaysAgo = new Date(currentDate);
     threeDaysAgo.setDate(currentDate.getDate() - 3);
@@ -43,5 +41,5 @@ export const localStore = {
         }
       }
     }
-  }
+  }*/
 };

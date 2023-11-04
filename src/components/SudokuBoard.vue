@@ -110,6 +110,7 @@ export default {
         curSelected: null,
         boardLoading: true,
         boardReady: false,
+        boardCreated: null,
         boardSolvedCheated: false,
         difficulty: 1,
         sudokuSolved: false,
@@ -120,6 +121,7 @@ export default {
         completedModal: false,
         inputModal: false,
         infoModal: false,
+        sudokuUploaded: false,
         infoModalContent: ""
     };
   },
@@ -137,7 +139,10 @@ export default {
         this.sudokuSolved = false
         this.showWrongCells = false
         this.boardReady = false
+        this.sudokuUploaded = false
         this.steps = []
+
+        solveBus.emit('boardUnsolved');
 
         // todo, actual game start & clean up unused/useless variables
         this.timerStarted = true
@@ -275,6 +280,8 @@ export default {
             // todo trycatch
             try{
                 const record = await pb.collection('solved_boards').create(data);
+                this.sudokuUploaded = true
+                this.updateStorage()
             }catch{
                 console.error("Error loading board")
             }
@@ -355,11 +362,12 @@ export default {
         if(done){
             this.sudokuSolved = true;
             this.timerStarted = false;
-
             // wait for confetti (if user is signed in)
-            if(pb.authStore.isValid && !this.boardSolvedCheated){
+            if(!this.boardSolvedCheated){
                 setTimeout(() => {
-                    this.completedModal = true;
+                    if(pb.authStore.isValid && !this.sudokuUploaded){
+                        this.completedModal = true;
+                    }
                     solveBus.emit('boardSolved', {boardId: this.boardId, elapsedTime: this.elapsedTime});
                 }, 1000);
             }
@@ -425,6 +433,7 @@ export default {
 
                 this.sudokuBoard = this.convertToSubgrids(record.board)
                 this.solvedBoard = this.convertToSubgrids(record.solved_board)
+                this.boardCreated = record.created
 
                 this.difficulty = record.difficulty
 
@@ -445,6 +454,7 @@ export default {
             this.elapsedTime = gameState.time
             this.steps = gameState.steps
             this.sudokuSolved = gameState.complete
+            this.sudokuUploaded = gameState.uploaded
             if(this.sudokuSolved){
                 this.timerStarted = false
             }
@@ -493,7 +503,13 @@ export default {
     },
 
     updateStorage(){
-        const data = {steps: this.steps, time: this.elapsedTime, complete: this.sudokuSolved}
+        const data = {
+            created: this.boardCreated,
+            steps: this.steps, 
+            time: this.elapsedTime, 
+            complete: this.sudokuSolved, 
+            uploaded: this.sudokuUploaded
+        }
         localStore.set(this.boardId, data);
     },
     
@@ -512,9 +528,7 @@ export default {
                         break;
                 }
             }
-            if(!this.sudokuSolved){
-                this.checkForCompletion()
-            }
+            this.checkForCompletion()
             this.boardReady = true
         }
     }
