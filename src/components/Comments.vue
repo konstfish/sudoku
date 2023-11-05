@@ -18,12 +18,12 @@ import IconClock from './icons/IconClock.vue'
 <template>
     <div class="comments">
         <div class="comment-input-container">
-            <div v-if="!this.boardComplete || !pb.authStore.isValid" class="comment-input-blur">
+            <div v-if="!boardComplete || !pb.authStore.isValid" class="comment-input-blur">
                 <span v-if="!pb.authStore.isValid">Please sign in to leave a comment</span>
-                <span v-else-if="!this.boardComplete">Please complete the board to comment</span>
+                <span v-else-if="!boardComplete">Please complete the board to comment</span>
             </div>
 
-            <div class="comment-input section" v-bind:class="{ blur: !this.boardComplete || !pb.authStore.isValid }">
+            <div class="comment-input section" v-bind:class="{ blur: !boardComplete || !pb.authStore.isValid }">
                 <label for="text"><span><IconChat /> Comment</span></label>
                 <textarea id="text" v-model="text" />
 
