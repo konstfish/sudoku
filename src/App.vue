@@ -10,12 +10,14 @@ import IconHome from './components/icons/IconHome.vue'
 import IconUser from './components/icons/IconUser.vue'
 import IconAbout from './components/icons/IconAbout.vue'
 import IconHistory from './components/icons/IconHistory.vue'
+
+import IconSudokuHarbor from './components/icons/IconSudokuHarbor.vue'
 </script>
 
 <template>
   <header>
     <div class="wrapper">
-      <h1>Sudoku Harbor</h1>
+      <h1><IconSudokuHarbor style="height: 48px"/> Sudoku Harbor</h1>
 
       <nav>
         <RouterLink to="/"><IconHome /> Home</RouterLink>

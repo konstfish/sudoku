@@ -1,7 +1,8 @@
 <script setup>
 import IconHeart from '../components/icons/IconHeart.vue'
-import Modal from '../components/Modal.vue'
+import IconSudokuHarbor from '../components/icons/IconSudokuHarbor.vue'
 
+import Modal from '../components/Modal.vue'
 </script>
 
 <template>
@@ -19,6 +20,7 @@ import Modal from '../components/Modal.vue'
 
     <Modal v-show="privacyModal" height=380 width=320 @close="privacyModal = false">
       <div class="privacy-policy">
+        <IconSudokuHarbor style="height: 200px;"/>
         <h3>Privacy Policy for SudokuHarbor.com</h3>
         <p>Effective Date: 28.10.2023</p>
         <p>Welcome to SudokuHarbor.com. This Privacy Policy outlines how we collect, use, and protect your personal information when you use our website. Please read this policy carefully, and if you have any questions, feel free to contact us.</p>
@@ -97,5 +99,9 @@ svg {
   flex-direction: column;
 
   gap: 12px;
+}
+
+a{
+  cursor: pointer;
 }
 </style>

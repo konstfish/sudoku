@@ -17,7 +17,7 @@ import IconClock from './icons/IconClock.vue'
 
 <template>
     <div class="comments">
-        <div class="comment-input-container" v-if="commentsReady">
+        <div class="comment-input-container">
             <div v-if="!this.boardComplete || !pb.authStore.isValid" class="comment-input-blur">
                 <span v-if="!pb.authStore.isValid">Please sign in to leave a comment</span>
                 <span v-else-if="!this.boardComplete">Please complete the board to comment</span>
@@ -106,7 +106,6 @@ export default {
   },
   data() {
     return {
-      commentsReady: true,
       userSignedIn: pb.authStore.isValid,
       commentsLoading: true,
       comments: [],
@@ -275,7 +274,7 @@ textarea{
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: var(--color-text);
+  background-color: var(--color-text-sec);
   top: 1px; 
   left: 1px;
   transition: all 0.3s;
