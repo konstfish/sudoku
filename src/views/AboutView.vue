@@ -7,12 +7,12 @@ import Modal from '../components/Modal.vue'
 
 <template>
   <div class="about">
-    <h3>Made with <IconHeart /> for my Mom</h3>
+    <h3>Made with <IconHeart class="heart"/> for my Mom</h3>
 
     <div class="donate">
       Filler text about donations
       <a href='https://buy.stripe.com/5kA6qz1R2g6l26k6oo'>
-        <button><IconHeart /> Donate</button>
+        <button><IconHeart class="heart"/> Donate</button>
       </a>
     </div>
 
@@ -84,7 +84,7 @@ import Modal from '../components/Modal.vue'
 </script>
 
 <style scoped>
-svg {
+.heart {
   color: var(--color-accent-sec);
 }
 
