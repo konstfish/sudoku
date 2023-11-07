@@ -3,13 +3,6 @@ import { pb } from '../lib/pocketbase'
 import { solveBus } from '../lib/solveBus' 
 
 import Comment from './Comment.vue'
-
-import { formatDateExact, formatTime } from '../lib/helpers'
-
-import IconCheck from './icons/IconCheck.vue'
-import IconHeart from './icons/IconHeart.vue'
-import IconTrash from './icons/IconTrash.vue'
-import IconClock from './icons/IconClock.vue'
 </script>
 
 <template>
@@ -80,11 +73,12 @@ export default {
 
             console.log(this.currentPage, records.items)
 
-            const userComment = records.items.find(obj => obj.expand.user_id.id === pb.authStore.model.id);
-            console.log(userComment)
-            if(userComment){
-                this.user_comment = userComment
-                records.items = records.items.filter(obj => obj.expand.user_id.id !== pb.authStore.model.id);
+            if(pb.authStore.isValid){
+                const userComment = records.items.find(obj => obj.expand.user_id.id === pb.authStore.model.id);
+                if(userComment){
+                    this.user_comment = userComment
+                    records.items = records.items.filter(obj => obj.expand.user_id.id !== pb.authStore.model.id);
+                }
             }
 
             if(records.items.length == 0){
@@ -119,6 +113,7 @@ export default {
 .comment-list{
     display: flex;
     flex-direction: column;
+    gap: 12px;
 
     width: calc(var(--cell-size) * 9 + 4px);
 }

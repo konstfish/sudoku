@@ -8,6 +8,8 @@ import IconCheck from './icons/IconCheck.vue'
 import IconHeart from './icons/IconHeart.vue'
 import IconTrash from './icons/IconTrash.vue'
 import IconClock from './icons/IconClock.vue'
+import IconChat from './icons/IconChat.vue'
+import IconChevron from './icons/IconChevron.vue'
 </script>
 
 <template>
@@ -29,7 +31,9 @@ import IconClock from './icons/IconClock.vue'
 
                     <span class="comment-created">
                         {{ formatDateExact(comment.created) }}
-                        <span v-if="comment.expand.user_id.id == pb.authStore.model.id" @click="deleteComment(comment.id)" class="comment-trash"><IconTrash /></span>
+                        <span v-if="pb.authStore.isValid">
+                            <span v-if="comment.expand.user_id.id == pb.authStore.model.id" @click="deleteComment(comment.id)" class="comment-trash"><IconTrash /></span>
+                        </span>
                     </span>
                 </div>
                 <span class="comment-solve-time" v-if="comment.show_time">
@@ -39,8 +43,49 @@ import IconClock from './icons/IconClock.vue'
             <div class="comment-text">
                 {{ comment.text }}
             </div>
+
+            <IconChevron class="comment-chevron" :class="{rotateChevron: repliesShown}" @click="openReplies()" />
+
             <div class="comment-replay" v-if="comment.show_replay">
                 <!-- todo -->
+            </div>
+        </div>
+
+        <div class="replies" ref="replies">
+            <div class="reply section" v-for="reply in replies" :key="reply">
+                <div class="comment-about">
+                    <div class="comment-head">
+                        <span class="comment-user">
+                            {{ reply.expand.user_id.username }}
+                            <span class="badge-container">
+                                <span v-if="reply.expand.user_id.verified" class="badge comment-user-verified"><IconCheck /></span>
+                                <span class="badge-label">Verified</span>
+                            </span>
+                            <span class="badge-container">
+                                <span v-if="reply.expand.user_id.supporter" class="badge comment-user-supporter"><IconHeart /></span>
+                                <span class="badge-label">Supporter</span>
+                            </span>
+                        </span>
+
+                        <span class="comment-created">
+                            {{ formatDateExact(reply.created) }}
+                            <span v-if="pb.authStore.isValid">
+                                <span v-if="reply.expand.user_id.id == pb.authStore.model.id" @click="deleteReply(reply.id)" class="comment-trash"><IconTrash /></span>
+                            </span>
+                        </span>
+                    </div>
+                </div>
+                <div class="comment-text">
+                    {{ reply.text }}
+                </div>
+            </div>
+
+            <div class="add-reply section" v-if="pb.authStore.isValid">
+                <label for="text"><span><IconChat /> Reply</span></label>
+                <div class="reply-submit">
+                    <input id="text" placeholder="Reply" v-model="text" />
+                    <button @click="submitReply()">Submit</button>
+                </div>
             </div>
         </div>
     </div>
@@ -62,6 +107,9 @@ export default {
   },
   data() {
     return {
+        replies: [],
+        repliesShown: false,
+        text: ""
     };
   },
   beforeMount(){
@@ -74,34 +122,54 @@ export default {
         }
     },
     async fetchReplies(){    
-        /*   
         try{
-            const records = await pb.collection('comments').getList(1, 10, {
-                filter: `board_id = "${this.boardId}"`,
+            const records = await pb.collection('comment_replies').getList(1, 30, {
+                filter: `comment_id = "${this.comment.id}"`,
                 expand: "user_id",
-                sort: "-created"
+                sort: "+created",
+                requestKey: this.comment.id
             });
 
-            this.comments = records.items
+            console.log(this.replies)
 
-            this.commentsLoading = false
-
-            this.solvedBoards = records.items
-            this.boardsLoading = false
+            this.replies = records.items
         }catch(err){
             console.log(err)
-        }*/ 
+        }
     },
-    async fetchUserComment(){
-        if(this.authStore.isValid){
-            const records = await pb.collection('comments').getList(1, 1, {
-                filter: `user_id = "${this.authStore.model.id}"`,
-                expand: "user_id",
-            });
+    async submitReply(){
+        try{
+            const data = {
+                "comment_id": this.comment.id,
+                "user_id": pb.authStore.model.id,
+                "text": this.text
+            };
+
+            const record = await pb.collection('comment_replies').create(data);
+
+            this.text = ""
+
+            this.fetchReplies();
+
+            setTimeout(() => {
+                this.$refs.replies.style.maxHeight = this.$refs.replies.scrollHeight + 200 + "px";
+            }, 250);
+        }catch(err){
+            console.err(err);
+        }
+    },
+    async deleteReply(replyId){
+        try{
+            await pb.collection('comment_replies').delete(replyId);
+
+            /* todo rewrite to make this cleaner*/
+
+            this.fetchReplies();
+        }catch(err){
+            console.log(err)
         }
     },
     async deleteComment(commentId){
-        console.log(commentId)
         try{
             await pb.collection('comments').delete(commentId);
 
@@ -109,19 +177,21 @@ export default {
         }catch(err){
             console.log(err)
         }
+    },
+    openReplies(){
+        if(this.repliesShown){
+            this.$refs.replies.style.maxHeight = "0px";
+        }else{
+            this.$refs.replies.style.maxHeight = this.$refs.replies.scrollHeight + 200 + "px";
+        }
+        this.repliesShown = !this.repliesShown;
+
     }
   }
 };
 </script>
 
 <style scoped>
-.comment-list{
-    display: flex;
-    flex-direction: column;
-
-    width: calc(var(--cell-size) * 9 + 4px);
-}
-
 .comment-head{
     display: flex;
     justify-content: space-between;
@@ -164,4 +234,37 @@ display: inline-block; /* or block depending on your layout */
 .badge-container:hover .badge-label{
     opacity: 1;
 }
+
+.replies{
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid var(--color-background-sec);
+    display: flex;
+    flex-direction: column;
+
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+input{
+  border-radius: 8px;
+  padding: 6px;
+  width: calc(100% - 12px - 60px);
+}
+
+.reply-submit{
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.comment-chevron{
+    transition: transform 0.1s ease;
+}
+
+.rotateChevron{
+    transform: rotate(0.5turn);
+}
+
 </style>
