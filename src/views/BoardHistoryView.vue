@@ -26,8 +26,7 @@ import IconClock from '../components/icons/IconClock.vue'
                   <span v-if="board.difficulty == 2">Medium</span>
                   <span v-if="board.difficulty == 3">Hard</span>
                 </h3>
-                <div class="stats">
-                </div>
+
                 <router-link :to="{ name: 'board', params: { id: board.id }}">
                   <button>Play Board</button>
                 </router-link>
@@ -111,16 +110,26 @@ export default {
 </script>
 
 <style scoped>
+
+.solved-boards{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content:space-around;
+  flex-direction: row;
+
+  gap: 6px;
+}
 .solved-board{
-  height: 240px;
 
   display: flex;
+  flex-direction: column;
+  padding: 12px;
 }
 
 .solved-board .board{
-  margin-right: 12px;
-  padding-right: 12px;
-  border-right: 1px solid var(--color-background-sec);
+  margin-bottom: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-background-sec);
 }
 
 .solved-board .info{
@@ -129,30 +138,17 @@ export default {
   flex-direction: column; 
 }
 
-.solved-board .info .stats{
-  margin-bottom: auto;
+h3{
+  margin-bottom: 6px;
 }
 
-.solved-board .info button{
-  margin: 0;
+a{
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-@media screen and (max-width: 470px) {
-  .solved-board{
-    justify-content: center;
-    height: auto;
-    flex-direction: column;
-  }
-
-  .solved-board .board{
-    align-self: center;
-    margin: 6px;
-    padding-right: 0;
-    border-right: none;
-  }
-
-  .solved-board .info{
-    margin: 6px;
-  }
+a button{
+  width: 100%;
 }
 </style>
