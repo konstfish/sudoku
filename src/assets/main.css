@@ -83,3 +83,11 @@ svg{
     margin-bottom: 8px;
     border: 1px solid var(--color-background-sec);
 }
+
+.comment-trash{
+  cursor: pointer;
+}
+
+button{
+  cursor: pointer;
+}

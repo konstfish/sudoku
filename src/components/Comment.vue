@@ -80,13 +80,13 @@ import IconChevron from './icons/IconChevron.vue'
                 </div>
             </div>
 
-            <div class="add-reply section" v-if="pb.authStore.isValid">
+            <form @submit.prevent class="add-reply section" v-if="pb.authStore.isValid">
                 <label for="text"><span><IconChat /> Reply</span></label>
                 <div class="reply-submit">
                     <input id="text" placeholder="Reply" v-model="text" />
-                    <button @click="submitReply()">Submit</button>
+                    <button type="submit" @click="submitReply()">Submit</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </template>

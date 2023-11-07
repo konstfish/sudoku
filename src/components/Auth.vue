@@ -21,11 +21,11 @@ import PasswordInput from './PasswordInput.vue'
       </button>
     </div>
 
-    <div class="input-group login-container">
+    <form @submit.prevent class="input-group login-container">
       
       <div class="inplab">
         <label for="email"><span><IconMail /> Mail</span></label>
-        <input type="text" v-model="inputEmail" placeholder="email" @input="checkEmail" id="email">
+        <input type="email" v-model="inputEmail" placeholder="email" @input="checkEmail" id="email">
       </div>
 
       <div class="inplab" v-if="!signIn">
@@ -35,17 +35,17 @@ import PasswordInput from './PasswordInput.vue'
 
       <PasswordInput @password-validation="handlePasswordValidation" />
 
-      <button @click="emailSignIn()" :disabled="!isPasswordValid || !isEmailValid || !buttonEnabled" v-if="signIn">
+      <button type="submit" @click="emailSignIn()" :disabled="!isPasswordValid || !isEmailValid || !buttonEnabled" v-if="signIn">
         <span v-if="!buttonEnabled" class="spinner"></span>Sign In
       </button>
-      <button @click="emailRegister()" :disabled="!isPasswordValid || !isEmailValid || !isUsernameValid || !buttonEnabled" v-if="!signIn">
+      <button type="submit" @click="emailRegister()" :disabled="!isPasswordValid || !isEmailValid || !isUsernameValid || !buttonEnabled" v-if="!signIn">
         <span v-if="!buttonEnabled" class="spinner"></span>Register
       </button>
 
       <div class="spacer">- or -</div>
 
       <button @click="oauthSignIn('google')"><IconGoogle /> <span v-if="signIn">Sign in</span><span v-if="!signIn">Register</span> with Google</button>
-    </div>
+    </form>
 
     <Modal v-show="infoModal" @close="infoModal = false" width="200" height="100">{{ infoModalContent }}</Modal>
   </div>

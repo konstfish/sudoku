@@ -14,7 +14,7 @@ import IconKey from './icons/IconKey.vue'
               @input="checkPassword"
               />
       </div>
-      <button @click="togglePasswordVisibility">
+      <button type="button" @click="togglePasswordVisibility">
         {{ showPassword ? "Hide" : "Show" }}
       </button>
     </div>

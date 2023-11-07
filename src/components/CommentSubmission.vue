@@ -17,7 +17,7 @@ import Modal from './Modal.vue'
             <span v-else-if="!boardComplete">Please complete the board to comment</span>
         </div>
 
-        <div class="comment-input section" v-bind:class="{ blur: !boardComplete || !pb.authStore.isValid }">
+        <form @submit.prevent class="comment-input section" v-bind:class="{ blur: !boardComplete || !pb.authStore.isValid }">
             <label for="text"><span><IconChat /> Comment</span></label>
             <textarea id="text" v-model="text" />
 
@@ -40,9 +40,9 @@ import Modal from './Modal.vue'
                     </div>
                 </div>
 
-                <button @click="submitComment()">Submit</button>
+                <button type="submit" @click="submitComment()">Submit</button>
             </div>
-        </div>
+          </form>
 
         <Modal v-show="infoModal" @close="infoModal = false" width="200" height="100">{{ infoModalContent }} A user can only create one comment.</Modal>
     </div>
@@ -98,6 +98,8 @@ export default {
             };
 
             const record = await pb.collection('comments').create(data);
+
+            this.text = "";
 
             solveBus.emit('commentPosted', record);
 
