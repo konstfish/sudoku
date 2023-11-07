@@ -11,35 +11,37 @@ import IconClock from './icons/IconClock.vue'
 </script>
 
 <template>
-    <div class="comment section" v-if="comment">
-        <div class="comment-about">
-            <div class="comment-head">
-                <span class="comment-user">
-                    {{ comment.expand.user_id.username }}
-                    <span class="badge-container">
-                        <span v-if="comment.expand.user_id.verified" class="badge comment-user-verified"><IconCheck /></span>
-                        <span class="badge-label">Verified</span>
+    <div class="ind-comment-container">
+        <div class="comment section" v-if="comment">
+            <div class="comment-about">
+                <div class="comment-head">
+                    <span class="comment-user">
+                        {{ comment.expand.user_id.username }}
+                        <span class="badge-container">
+                            <span v-if="comment.expand.user_id.verified" class="badge comment-user-verified"><IconCheck /></span>
+                            <span class="badge-label">Verified</span>
+                        </span>
+                        <span class="badge-container">
+                            <span v-if="comment.expand.user_id.supporter" class="badge comment-user-supporter"><IconHeart /></span>
+                            <span class="badge-label">Supporter</span>
+                        </span>
                     </span>
-                    <span class="badge-container">
-                        <span v-if="comment.expand.user_id.supporter" class="badge comment-user-supporter"><IconHeart /></span>
-                        <span class="badge-label">Supporter</span>
-                    </span>
-                </span>
 
-                <span class="comment-created">
-                    {{ formatDateExact(comment.created) }}
-                    <span v-if="comment.expand.user_id.id == pb.authStore.model.id" @click="deleteComment(comment.id)" class="comment-trash"><IconTrash /></span>
+                    <span class="comment-created">
+                        {{ formatDateExact(comment.created) }}
+                        <span v-if="comment.expand.user_id.id == pb.authStore.model.id" @click="deleteComment(comment.id)" class="comment-trash"><IconTrash /></span>
+                    </span>
+                </div>
+                <span class="comment-solve-time" v-if="comment.show_time">
+                    <IconClock />{{ formatTime(comment.solve_time) }}
                 </span>
             </div>
-            <span class="comment-solve-time" v-if="comment.show_time">
-                <IconClock />{{ formatTime(comment.solve_time) }}
-            </span>
-        </div>
-        <div class="comment-text">
-            {{ comment.text }}
-        </div>
-        <div class="comment-replay" v-if="comment.show_replay">
-            <!-- todo -->
+            <div class="comment-text">
+                {{ comment.text }}
+            </div>
+            <div class="comment-replay" v-if="comment.show_replay">
+                <!-- todo -->
+            </div>
         </div>
     </div>
 </template>

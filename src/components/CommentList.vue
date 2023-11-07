@@ -60,6 +60,12 @@ export default {
   },
   methods: {
     initComponent(){
+        this.comments = []
+        this.user_comment = null
+        this.currentPage = 1
+        this.commentsToLoad = true
+        this.commentsLoading = true
+
         if(this.boardId != null){
             this.fetchComments();
         }
