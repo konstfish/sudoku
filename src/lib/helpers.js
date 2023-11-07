@@ -70,3 +70,22 @@ export function getDayRangeQuery(){
 
     return query
 }
+
+export function extractErrorMessage(error) {
+    if (error && typeof error === 'object') {
+        if ('message' in error) {
+            return error.message;
+        }
+
+        for (let key in error) {
+            if (error.hasOwnProperty(key)) {
+                const result = this.extractErrorMessage(error[key]);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+    }
+
+    return 'Unknown Error';
+}

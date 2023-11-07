@@ -15,9 +15,11 @@ import { getDayRangeQuery } from '../lib/helpers'
       </button>
     </div>
 
-    <SudokuBoard :boardId='optionsId[optionSelected]' />
+    <div class="game">
+      <SudokuBoard :boardId='optionsId[optionSelected]' />
 
-    <Comments :boardId='optionsId[optionSelected]' />
+      <Comments :boardId='optionsId[optionSelected]' />
+    </div>
   </main>
 </template>
 
@@ -68,6 +70,12 @@ main{
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.game{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .button-group {

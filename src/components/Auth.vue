@@ -1,5 +1,6 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
+import { extractErrorMessage } from '../lib/helpers'
 
 import Modal from './Modal.vue'
 
@@ -120,32 +121,17 @@ export default {
       this.buttonEnabled = true
       this.infoModal = true
 
-      if(error.data == {}){
-        this.infoModalContent = error.data.message
-      }else{
-        this.infoModalContent = this.extractErrorMessage(error.data.data)
+      try{
+        if(error.data.message){
+          this.infoModalContent = error.data.message
+        }else{
+          this.infoModalContent = extractErrorMessage(error.data.data)
+        }
+      }catch(err){
+        this.infoModalContent = extractErrorMessage(error.data.data)
       }
 
       console.error(error.data)
-    },
-
-    extractErrorMessage(error) {
-      if (error && typeof error === 'object') {
-          if ('message' in error) {
-              return error.message;
-          }
-
-          for (let key in error) {
-              if (error.hasOwnProperty(key)) {
-                  const result = this.extractErrorMessage(error[key]);
-                  if (result) {
-                      return result;
-                  }
-              }
-          }
-      }
-
-      return 'Unknown Error';
     },
 
     handlePasswordValidation({ password, isValid }) {
