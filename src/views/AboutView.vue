@@ -10,8 +10,8 @@ import Modal from '../components/Modal.vue'
     <h3>Made with <IconHeart class="heart"/> for my Mom</h3>
 
     <div class="donate">
-      Filler text about donations
-      <a href='https://buy.stripe.com/5kA6qz1R2g6l26k6oo'>
+      Your donation helps sustain our website and awards you a Supporter Badge as a thank you.
+      <a href='https://www.paypal.com/donate/?hosted_button_id=KVSN7JA556CLQ'>
         <button><IconHeart class="heart"/> Donate</button>
       </a>
     </div>
@@ -77,7 +77,7 @@ import Modal from '../components/Modal.vue'
       return {
         privacyModal: false
       }
-    }, 
+    },
     methods: {
     },
   };
@@ -99,6 +99,16 @@ import Modal from '../components/Modal.vue'
   flex-direction: column;
 
   gap: 12px;
+}
+
+.donate{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+button{
+  cursor: pointer;
 }
 
 a{
