@@ -66,7 +66,7 @@ export default {
       if(pb.authStore.isValid){
         this.boardsLoading = true
 
-        const records = await pb.collection('boards').getList(this.currentPage, 3, {
+        const records = await pb.collection('boards').getList(this.currentPage, 6, {
             sort: "-created"
         });
 
