@@ -9,6 +9,8 @@ import Modal from '../components/Modal.vue'
   <div class="about">
     <h3>Made with <IconHeart class="heart"/> for my Mom</h3>
 
+    <span>View the source code on <a href="https://github.com/konstfish/sudoku">GitHub</a></span>
+
     <div class="donate">
       Your donation helps sustain our website and awards you a Supporter Badge as a thank you.
       <a href='https://www.paypal.com/donate/?hosted_button_id=KVSN7JA556CLQ'>
