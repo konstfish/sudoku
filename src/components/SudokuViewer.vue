@@ -1,5 +1,7 @@
 <script setup>
 import Timer from './Timer.vue'
+
+import { mlog, merr } from '../lib/helpers'
 </script>
 
 <template>
@@ -59,10 +61,10 @@ export default {
   methods: {
     /* HELPERS */
     initComponent(){
-        console.log("populating board")
+        mlog("populating board")
         this.sudokuBoard = this.createBoard()
 
-        console.log("fetch board")
+        mlog("fetch board")
         this.loadBoards()
     },
     loadBoards(){
@@ -130,7 +132,7 @@ export default {
         this.elapsedTime = this.steps[index].time
         for (let i = 0; i <= index; i++) {
             let step = this.steps[i]
-            console.log(step)
+            mlog(step)
             switch (step.action) {
                 case "note":
                     this.sudokuBoard[step.sectionIndex][step.cellIndex].notes = step.number

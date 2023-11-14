@@ -3,6 +3,8 @@ import { pb } from '../lib/pocketbase'
 import { solveBus } from '../lib/solveBus'
 import { extractErrorMessage } from '../lib/helpers'
 
+import { mlog, merr } from '../lib/helpers'
+
 import IconChat from './icons/IconChat.vue'
 import IconReplay from './icons/IconReplay.vue'
 import IconClock from './icons/IconClock.vue'
@@ -125,7 +127,7 @@ export default {
         this.infoModalContent = extractErrorMessage(error.data.data)
       }
 
-      console.error(error.data)
+      merr(error.data)
     },
   }
 };

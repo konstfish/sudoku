@@ -14,32 +14,21 @@ export const localStore = {
   check(id) {
     return localStorage.getItem(id) !== null;
   },
-  /*createKey(id){
-    let date = new Date();
-    date = date.toISOString().split('T')[0];
-
-    return `${date}-${id}`
-  },
   deleteOldKeys(){
-
-    // rewrite this
     const currentDate = new Date();
-    const threeDaysAgo = new Date(currentDate);
-    threeDaysAgo.setDate(currentDate.getDate() - 3);
+    const oldestDate = new Date(currentDate);
+    oldestDate.setDate(currentDate.getDate() - 10);
   
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      const keyParts = key.split('-');
-  
-      if (keyParts.length === 2) {
-        const keyDate = new Date(keyParts[0]);
-        const id = parseInt(keyParts[1]);
-  
-        if (keyDate < threeDaysAgo) {
+
+      if (localStore.get(key).created) {
+        const keyDate = new Date(localStore.get(key).created);
+    
+        if (keyDate < oldestDate) {
           localStorage.removeItem(key);
-          console.log(`Key "${key}" deleted.`);
         }
       }
     }
-  }*/
+  }
 };

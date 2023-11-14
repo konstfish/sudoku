@@ -1,7 +1,7 @@
 <script setup>
 import { pb } from '../lib/pocketbase'
 
-import { formatDate, formatTime } from '../lib/helpers'
+import { formatDate, formatTime, mlog, merr } from '../lib/helpers'
 
 import SudokuBoardMin from '../components/SudokuBoardMin.vue';
 import SudokuViewer from '../components/SudokuViewer.vue';
@@ -70,7 +70,7 @@ export default {
             sort: "-created"
         });
 
-        console.log(this.currentPage, records.items)
+        mlog(this.currentPage, records.items)
 
         if(records.items.length == 0){
           this.boardsToLoad = false
@@ -93,7 +93,7 @@ export default {
     },
     showReplay(boardId){
       const temp = this.solvedBoards.find(obj => obj.id === boardId);
-      console.log(this.solvedBoards.find(obj => obj.id === boardId))
+      mlog(this.solvedBoards.find(obj => obj.id === boardId))
       this.boardData = {
         board: temp.expand.board_id.board,
         steps: temp.steps,

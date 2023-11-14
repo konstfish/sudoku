@@ -3,6 +3,8 @@ import { pb } from '../lib/pocketbase'
 
 import { formatDate } from '../lib/helpers'
 
+import { mlog, merr } from '../lib/helpers'
+
 import SudokuBoardListProfile from './SudokuBoardListProfile.vue'
 
 import Modal from './Modal.vue'
@@ -74,12 +76,12 @@ export default {
       try{
         const record = await pb.collection('users').update(pb.authStore.model.id, data);
         if (pb.authStore.isValid) {
-          console.log("refresh auth")
+          mlog("refresh auth")
           await pb.collection('users').authRefresh();
           this.storeUser = pb.authStore.model.username
         }
       }catch(err){
-        console.log(err)
+        merr(err)
       }
     },
     async verifyMail(){

@@ -2,7 +2,9 @@
 import { pb } from '../lib/pocketbase'
 import { localStore } from '../lib/localstore'
 import { solveBus } from '../lib/solveBus' 
-import { generateRange } from '../lib/helpers'
+
+import { generateRange, mlog, merr } from '../lib/helpers'
+
 
 import { isMobile } from 'mobile-device-detect';
 
@@ -127,7 +129,7 @@ export default {
   },
   beforeMount(){
     if(isMobile){
-        console.log("mobile", isMobile)
+        mlog("mobile", isMobile)
     }
 
     this.initComponent();
@@ -148,14 +150,14 @@ export default {
         this.timerStarted = true
         this.elapsedTime = 0
 
-        console.log("populating board")
+        mlog("populating board")
         this.sudokuBoard = this.createBoard()
 
         if(this.boardId){
-            console.log("fetch board")
+            mlog("fetch board")
             this.fetchBoard();
 
-            console.log("check localstorage")
+            mlog("check localstorage")
             this.checkStorage()
         }
     },
@@ -268,7 +270,7 @@ export default {
     /* pocketbase */
     async postCompletion(){
         if(pb.authStore.isValid){
-            console.log("posting result")
+            mlog("posting result")
 
             const data = {
                 "user_id": pb.authStore.model.id,
@@ -283,7 +285,7 @@ export default {
                 this.sudokuUploaded = true
                 this.updateStorage()
             }catch{
-                console.error("Error loading board")
+                merr("Error loading board")
             }
         }
         this.completedModal = false
@@ -426,7 +428,7 @@ export default {
         }
     },
     async fetchBoard(){
-        console.log(this.boardId)
+        mlog(this.boardId)
         if(this.boardId){
             try{
                 const record = await pb.collection('boards').getOne(this.boardId);
@@ -440,7 +442,7 @@ export default {
                 this.matchSolvedBoard()
                 this.boardLoading = false
             }catch{
-                console.error("Error loading board")
+                merr("Error loading board")
             }
         }
     },
@@ -483,7 +485,7 @@ export default {
     undoStep(){
         if(this.steps.length > 0){
             const step = this.steps.pop()
-            console.log(step);
+            mlog(step);
 
             switch (step.action) {
                 case "note":

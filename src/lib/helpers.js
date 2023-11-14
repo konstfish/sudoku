@@ -18,7 +18,7 @@ export function formatDate(inpDate) {
 
         return `${monthName} ${date.getDate()}, ${date.getFullYear()}`;
     } catch (e) {
-        console.error(e.message);
+        merr(e.message);
         return null;
     }
 }
@@ -42,7 +42,7 @@ export function formatDateExact(inpDate){
 
         return `${monthName} ${date.getDate()}, ${date.getFullYear()} ${hour}:${minute}`;
     } catch (e) {
-        console.error(e.message);
+        merr(e.message);
         return null;
     }
 }
@@ -53,7 +53,7 @@ export function formatTime(inpTime){
         const minutes = Math.floor(inpTime / 60);
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     } catch (e) {
-        console.error(e.message);
+        merr(e.message);
         return null;
     }
 }
@@ -73,10 +73,6 @@ export function getDayRangeQuery(){
 
 export function extractErrorMessage(error) {
     if (error && typeof error === 'object') {
-        if ('message' in error) {
-            return error.message;
-        }
-
         for (let key in error) {
             if (error.hasOwnProperty(key)) {
                 const result = this.extractErrorMessage(error[key]);
@@ -85,7 +81,29 @@ export function extractErrorMessage(error) {
                 }
             }
         }
+
+        if ('message' in error) {
+            return error.message;
+        }
     }
 
     return 'Unknown Error';
+}
+
+export function mlog(...args) {
+    if (process.env.NODE_ENV !== 'production') {
+        const originalTrace = new Error().stack.split('\n');
+        const callerTrace = originalTrace[2] || '';
+
+        console.log(...args, '\n\t', callerTrace.trim());
+    }
+}
+
+export function merr(...args) {
+    if (process.env.NODE_ENV !== 'production') {
+        const originalTrace = new Error().stack.split('\n');
+        const callerTrace = originalTrace[2] || '';
+        
+        console.error(...args, '\n\t', callerTrace.trim());
+    }
 }

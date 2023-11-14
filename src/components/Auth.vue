@@ -2,6 +2,8 @@
 import { pb } from '../lib/pocketbase'
 import { extractErrorMessage } from '../lib/helpers'
 
+import { mlog, merr } from '../lib/helpers'
+
 import Modal from './Modal.vue'
 
 import IconUser from './icons/IconUser.vue'
@@ -80,11 +82,11 @@ export default {
             w.location.href = url
           },
         });
-        console.log(authData)
+        mlog(authData)
 
-        console.log(pb.authStore.isValid);
-        console.log(pb.authStore.token);
-        console.log(pb.authStore.model.id);
+        mlog(pb.authStore.isValid);
+        mlog(pb.authStore.token);
+        mlog(pb.authStore.model.id);
     },
 
     async emailSignIn(){
@@ -131,7 +133,7 @@ export default {
         this.infoModalContent = extractErrorMessage(error.data.data)
       }
 
-      console.error(error.data)
+      merr(error.data)
     },
 
     handlePasswordValidation({ password, isValid }) {

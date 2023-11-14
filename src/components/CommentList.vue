@@ -2,6 +2,8 @@
 import { pb } from '../lib/pocketbase'
 import { solveBus } from '../lib/solveBus' 
 
+import { mlog, merr } from '../lib/helpers'
+
 import Comment from './Comment.vue'
 </script>
 
@@ -71,7 +73,7 @@ export default {
                 sort: "-created"
             });
 
-            console.log(this.currentPage, records.items)
+            mlog(this.currentPage, records.items)
 
             if(pb.authStore.isValid){
                 const userComment = records.items.find(obj => obj.expand.user_id.id === pb.authStore.model.id);
@@ -89,7 +91,7 @@ export default {
 
             this.commentsLoading = false
         }catch(err){
-            console.log(err)
+            merr(err)
         }
     },
     async handleUserComment(){

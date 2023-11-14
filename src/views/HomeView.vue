@@ -4,7 +4,7 @@ import Comments from '../components/Comments.vue'
 
 import { pb } from '../lib/pocketbase'
 
-import { getDayRangeQuery } from '../lib/helpers'
+import { getDayRangeQuery, mlog, merr } from '../lib/helpers'
 </script>
 
 <template>
@@ -57,7 +57,7 @@ export default {
               this.optionsId[board.difficulty] = board.id
           }
       }catch(err){
-          console.error(err)
+          merr(err)
       }
     }
   },

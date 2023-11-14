@@ -4,6 +4,8 @@ import { solveBus } from '../lib/solveBus'
 
 import { formatDateExact, formatTime } from '../lib/helpers'
 
+import { mlog, merr } from '../lib/helpers'
+
 import IconCheck from './icons/IconCheck.vue'
 import IconHeart from './icons/IconHeart.vue'
 import IconTrash from './icons/IconTrash.vue'
@@ -130,11 +132,11 @@ export default {
                 requestKey: this.comment.id
             });
 
-            console.log(this.replies)
+            mlog(this.replies)
 
             this.replies = records.items
         }catch(err){
-            console.log(err)
+            mlog(err)
         }
     },
     async submitReply(){
@@ -155,7 +157,7 @@ export default {
                 this.$refs.replies.style.maxHeight = this.$refs.replies.scrollHeight + 200 + "px";
             }, 250);
         }catch(err){
-            console.err(err);
+            merr(err);
         }
     },
     async deleteReply(replyId){
@@ -166,7 +168,7 @@ export default {
 
             this.fetchReplies();
         }catch(err){
-            console.log(err)
+            mlog(err)
         }
     },
     async deleteComment(commentId){
@@ -175,7 +177,7 @@ export default {
 
             solveBus.emit('commentDeleted', commentId);
         }catch(err){
-            console.log(err)
+            mlog(err)
         }
     },
     openReplies(){

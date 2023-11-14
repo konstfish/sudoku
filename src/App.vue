@@ -5,6 +5,7 @@ import LogRocket from 'logrocket';
 LogRocket.init('dzh8o1/sudokuharborcom');
 
 import { pb } from './lib/pocketbase'
+import { localStore } from './lib/localstore';
 
 import IconHome from './components/icons/IconHome.vue'
 import IconUser from './components/icons/IconUser.vue'
@@ -38,7 +39,11 @@ export default {
     };
   },
   beforeMount(){
+    console.log('Hello :) View this projects source at https://github.com/konstfish/sudoku')
+
     this.refreshAuth();
+
+    localStore.deleteOldKeys();
   },
   methods: {
     async refreshAuth(){
