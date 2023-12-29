@@ -4,6 +4,11 @@ import { RouterLink, RouterView } from 'vue-router'
 import LogRocket from 'logrocket';
 LogRocket.init('dzh8o1/sudokuharborcom');
 
+/*import Plausible from 'plausible-tracker'
+const plausible = Plausible({
+  domain: 'sudokuharbor.com'
+})*/
+
 import { pb } from './lib/pocketbase'
 import { localStore } from './lib/localstore';
 
