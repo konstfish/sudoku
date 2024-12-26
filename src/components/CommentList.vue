@@ -9,7 +9,7 @@ import Comment from './Comment.vue'
 
 <template>
     <div class="comment-list">
-        <span v-if="commentsLoading">Loading...</span>
+        <span v-if="commentsLoading"></span>
 
         <Comment :comment="user_comment" v-if="user_comment" id="user-comment"/>
 

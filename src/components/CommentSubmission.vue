@@ -13,8 +13,8 @@ import Modal from './Modal.vue'
 </script>
 
 <template>
-    <div class="comment-input-container">
-        <div v-if="!boardComplete || !pb.authStore.isValid" class="comment-input-blur">
+    <div class="comment-input-container" v-if="boardComplete">
+        <div v-if="!pb.authStore.isValid" class="comment-input-blur">
             <span v-if="!pb.authStore.isValid">Please sign in to leave a comment</span>
             <span v-else-if="!boardComplete">Please complete the board to comment</span>
         </div>
@@ -164,6 +164,8 @@ export default {
 textarea{
   border-radius: 8px;
   padding: 6px;
+  max-width: calc(100% - 12px);
+  min-width: calc(100% - 12px);
 }
 
 #text{

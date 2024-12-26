@@ -11,12 +11,12 @@ import Modal from '../components/Modal.vue'
 
     <span>View the source code on <a href="https://github.com/konstfish/sudoku">GitHub</a></span>
 
-    <div class="donate">
+    <!--<div class="donate">
       Your donation helps sustain our website and awards you a Supporter Badge as a thank you.
       <a href='https://www.paypal.com/donate/?hosted_button_id=KVSN7JA556CLQ'>
         <button><IconHeart class="heart"/> Donate</button>
       </a>
-    </div>
+    </div>-->
 
     <a @click="privacyModal = !privacyModal">Privacy Policy</a>
 
