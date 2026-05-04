@@ -10,8 +10,8 @@ pb_pass = os.environ.get("POCKETBASE_PASSWORD")
 
 try:
     admin_data = client.admins.auth_with_password(pb_user, pb_pass)
-except:
-    print("Auth failed, exiting")
+except Exception as e:
+    print(e)
     exit(1)
 
 def upload_board(difficulty):
